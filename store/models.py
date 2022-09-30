@@ -61,6 +61,9 @@ class ProductImages(models.Model):
     product =  models.ForeignKey(Product, null=True, on_delete= models.CASCADE)
     img = models.ImageField(default="product-pic.jpg",null = True,blank = True)
 
+    def __str__(self):
+        return self.product.name
+
 class Review(models.Model):
     user = models.ForeignKey(Customer, models.CASCADE)
     product = models.ForeignKey(Product, models.CASCADE)
