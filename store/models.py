@@ -41,11 +41,25 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Color(models.Model):
+    color = models.CharField(max_length=200, null=True)
+
+    def __str__(self):
+        return self.color
+
+class Size(models.Model):
+    size = models.CharField(max_length=200, null=True)
+
+    def __str__(self):
+        return self.size
 
 class Product(models.Model):
     name = models.CharField(max_length=200,blank = True, null=True)
     price = models.FloatField(default=0,null=True)
     category = models.ManyToManyField(Category)
+    color = models.ManyToManyField(Color)
+    size = models.ManyToManyField(Size)
+    product_code = models.CharField(max_length=2000, null=True,blank=True)
     description = models.CharField(max_length=2000, null=True,blank=True)
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     stock = models.IntegerField(default=0, null = True,blank = True)
@@ -59,7 +73,8 @@ class Product(models.Model):
 
 class ProductImages(models.Model):
     product =  models.ForeignKey(Product, null=True, on_delete= models.CASCADE)
-    img = models.ImageField(default="product-pic.jpg",null = True,blank = True)
+    n_img = models.ImageField(default="product-pic.jpg",null = True,blank = True)
+    Z_img = models.ImageField(default="product-pic.jpg",null = True,blank = True)
 
     def __str__(self):
         return self.product.name
@@ -73,3 +88,11 @@ class Review(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+class IndivitualCategory(models.Model):
+    user = models.ForeignKey(User, null = True,blank=True ,on_delete=models.CASCADE)
+    category_for =  models.CharField(max_length=200,blank=True, null=True)
+    categorys = models.ManyToManyField(Category)
+
+    def __str__(self):
+        return self.category_for

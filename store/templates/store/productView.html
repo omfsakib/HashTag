@@ -1,0 +1,256 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    document.body.classList.add(
+        'product-product',
+        'home4',
+        'group1'
+        );
+    $(document).ready(function(){
+        
+	    $('.breadcrumb').before($('.heading-title'));
+    })
+
+</script>
+<div id="product-product" class="container">
+    <h1 class="heading-title">detail product</h1>
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:product_view' product.id %}">{{product.name}}</a></li>
+    </ul>
+    <div class="row">
+        <div id="content" class="col-sm-12">
+
+            {% include 'components/loginRegistration.html' %}
+
+            <div class="row">
+                <div class="col-sm-6 block-1 owl-style2"> 
+                    <div class="thumbnails">
+                        <a class="thumbnail">
+                            {% for i in big_img %}
+                            <img data-zoom-image="http://127.0.0.1:8000{{i.Z_img.url}}" src="{{i.n_img.url}}" title="{{product.name}}" alt="{{product.name}}" />
+                            {% endfor %}
+                        </a>
+                    </div>			
+                    <div id="gallery_01" class="thumbnails-additional owl-carousel owl-theme">
+                        {% for j in images %}
+                        <a style="display: none" href="#" class="thumbnail elevatezoom-gallery " data-image="http://127.0.0.1:8000{{j.n_img.url}}" data-zoom-image="http://127.0.0.1:8000{{j.Z_img.url}}"  title="{{product.name}}">
+                            <img src="{{j.n_img.url}}" title="{{product.name}}" alt="{{product.name}}" />
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+        $('.related-container').owlCarousel({
+            items: 4,
+            nav: true,
+            dots: false,
+            navSpeed: 1000,
+            margin: 20,
+            responsive:{
+                0:{
+                    items: 1
+                },
+                481:{
+                    items: 2
+                },
+                769:{
+                    items: 2
+                },
+                1024:{
+                    items: 3
+                },
+                1200:{
+                    items: 4
+                },
+            },
+            navText : ['<i class="ion-chevron-left"></i>','<i class="ion-chevron-right"></i>'],
+        });
+        var thumbnails_owl = $('#product-product .thumbnails-additional');	
+        thumbnails_owl.on('initialize.owl.carousel initialized.owl.carousel ' +
+            'initialize.owl.carousel initialize.owl.carousel ',
+            function(e) {
+            $("#product-product #gallery_01 .thumbnail").show();
+            });
+        thumbnails_owl.owlCarousel({
+            items: 4,
+            nav: true,
+            dots: false,
+            navSpeed: 1000,
+            margin: 20,		
+            navText : ['<i class="ion-chevron-left"></i>','<i class="ion-chevron-right"></i>'],				
+        });	
+        $("#product-product .thumbnails img").elevateZoom({		
+            gallery : "gallery_01",
+            galleryActiveClass: "active",
+            borderColour: "#ee3333",
+        });
+        var thumbnails_additional = $('#product-product .thumbnails-additional .thumbnail');
+        thumbnails_additional.each(function(){
+            $(this).click(function(){
+                thumbnails_additional.removeClass('current-additional');
+                $(this).addClass('current-additional');
+            });
+        });
+        var minimum = 1;
+        $("#product-product #input-quantity").change(function(){
+            if ($(this).val() < minimum) {
+            alert("Minimum Quantity: "+minimum);
+            $("#product-product #input-quantity").val(minimum);
+            }
+        });
+        // increase number of product
+        function minus(minimum){
+            var currentval = parseInt($("#product-product #input-quantity").val());
+            $("#product-product #input-quantity").val(currentval-1);
+            if($("#product-product #input-quantity").val() <= 0 || $("#product-product #input-quantity").val() < minimum){
+            alert("Minimum Quantity: "+minimum);
+            $("#product-product #input-quantity").val(minimum);
+            }
+        };
+        // decrease of product
+        function plus(){
+            var currentval = parseInt($("#product-product #input-quantity").val());
+            $("#product-product #input-quantity").val(currentval+1);
+        };
+        $('#product-product #minus').click(function(){
+            minus(minimum);
+        });
+        $('#product-product #plus').click(function(){
+            plus();
+        });
+    });
+
+    </script>
+    <div class="col-sm-6 block-2">
+        <h1 class="product-name">{{product.name}}</h1>
+        <div class="ratings">
+            <div class="rating-box">
+                {% if product.rate <= 0 %}
+                <div class="rating0">rating</div>
+                {% elif product.rate <= 1 %}
+                <div class="rating1">rating</div>
+                {% elif product.rate <= 2 %}
+                <div class="rating2">rating</div>
+                {% elif product.rate <= 3 %}
+                <div class="rating3">rating</div>
+                {% elif product.rate <= 4 %}
+                <div class="rating4">rating</div>
+                {% elif product.rate <= 5 %}
+                <div class="rating5">rating</div>
+                {% endif %}
+            </div>
+            <a href="#" onclick="$('a[href=\'#tab-review\']').trigger('click'); $('body,html').animate({scrollTop: $('.block-3 .nav-tabs').offset().top}, 800); return false;">{{total_review}} reviews</a> / <a href="#" onclick="$('a[href=\'#tab-review\']').trigger('click'); $('body,html').animate({scrollTop: $('.block-3 .nav-tabs').offset().top}, 800); return false;">Write a review</a>
+        </div>												            
+        <ul class="list-unstyled">
+            <li class="price">
+                <span>&#2547;{{product.price}}</span>
+            </li>
+        </ul>
+        <ul class="list-unstyled">
+            <li>Product Code: <span class="ex-text">{{product.product_code}}</span></li>
+            {% if product.stock > 0 %}
+            <li>Availability: <span class="ex-text">In Stock</span></li>
+            {% else %}
+            <li>Availability: <span class="ex-text">Out Of Stock</span></li>
+            {% endif %}
+        </ul>          
+        <div id="product"> 
+            <div class="form-group">
+                <label class="control-label" for="input-quantity">Qty</label>
+                <div class="quantity-box">
+                    <input type="text" name="quantity" value="1" size="2" id="input-quantity" class="form-control" />
+                    <input type="button" id="plus" value="&#43;" class="form-control"/>
+                    <input type="button" id="minus" value="-" class="form-control" />					
+                </div>
+                    <input type="hidden" name="product_id" value="{{product.id}}" />              
+                    <button type="button" id="button-cart" data-loading-text="Loading..." class="btn">
+                        <i class="ion-bag"></i>Add to Cart
+                    </button>
+                <div class="btn-actions">
+                    <button class="btn-wishlist" type="button" data-toggle="tooltip" class="btn btn-default" title="Add to Wish List" onclick="wishlist.add('36');"><i class="ion-android-favorite-outline"></i></button>
+                    <button class="btn-compare" type="button" data-toggle="tooltip" class="btn btn-default" title="Compare this Product" onclick="compare.add('36');"><i class="ion-android-options"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="block-3 col-sm-12">
+        <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#tab-description" data-toggle="tab">Description</a>
+        </li>
+                                <li><a href="#tab-review" data-toggle="tab">Reviews (1)</a></li>
+                  </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab-description"><div>
+<p>
+    <strong>Video in your pocket.</strong></p>
+<p>
+    Its the small iPod with one very big idea: video. The worlds most popular music player now lets you enjoy movies, TV shows, and more on a two-inch display thats 65% brighter than before.</p>
+<p>
+    <strong>Cover Flow.</strong></p>
+<p>
+    Browse through your music collection by flipping through album art. Select an album to turn it over and see the track list.<strong>&nbsp;</strong></p>
+<p>
+    <strong>Enhanced interface.</strong></p>
+<p>
+    Experience a whole new way to browse and view your music and video.</p>
+<p>
+    <strong>Sleek and colorful.</strong></p>
+<p>
+    With an anodized aluminum and polished stainless steel enclosure and a choice of five colors, iPod nano is dressed to impress.</p>
+<p>
+    <strong>iTunes.</strong></p>
+<p>
+    Available as a free download, iTunes makes it easy to browse and buy millions of songs, movies, TV shows, audiobooks, and games and download free podcasts all at the iTunes Store. And you can import your own music, manage your whole media library, and sync your iPod or iPhone with ease.</p>
+</div>
+</div>
+                                <div class="tab-pane" id="tab-review">
+          <form class="form-horizontal" id="form-review">
+            <div id="review"></div>
+            <h2>Write a review</h2>
+                            <div class="form-group required">
+              <div class="col-sm-12">
+                <label class="control-label" for="input-name">Name</label>
+                <input type="text" name="name" value="" id="input-name" class="form-control" />
+              </div>
+            </div>
+            <div class="form-group required">
+              <div class="col-sm-12">
+                <label class="control-label" for="input-review">Your Review</label>
+                <textarea name="text" rows="5" id="input-review" class="form-control"></textarea>
+                <div class="help-block"><span class="text-danger">Note:</span> HTML is not translated!</div>
+              </div>
+            </div>
+            <div class="form-group required">
+              <div class="col-sm-12">
+                <label class="control-label">Rating</label>
+                &nbsp;&nbsp;&nbsp; Bad&nbsp;
+                <input type="radio" name="rating" value="1" />
+                &nbsp;
+                <input type="radio" name="rating" value="2" />
+                &nbsp;
+                <input type="radio" name="rating" value="3" />
+                &nbsp;
+                <input type="radio" name="rating" value="4" />
+                &nbsp;
+                <input type="radio" name="rating" value="5" />
+                &nbsp;Good</div>
+            </div>
+            
+            <div class="buttons clearfix">
+              <div class="pull-right">
+                <button type="button" id="button-review" data-loading-text="Loading..." class="btn btn-primary">Continue</button>
+              </div>
+            </div>
+                          </form>
+        </div>
+                    </div>
+     </div>
+</div>
+{% endblock %}

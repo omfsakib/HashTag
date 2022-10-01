@@ -5,7 +5,6 @@ def productSerialize(id):
     product = Product.objects.get(id = id)
 
     total_images = ProductImages.objects.filter(product = product).count()
-    print(total_images)
     if total_images == 1: 
         product_image_1_loop = ProductImages.objects.filter(product = product)[:1]
         for k in product_image_1_loop:
@@ -16,6 +15,9 @@ def productSerialize(id):
             'name':product.name,
             'price':product.price,
             'category':product.category.all(),
+            'color':product.color.all(),
+            'size':product.size.all(),
+            'product_code':product.product_code,
             'description':product.description,
             'date_created':product.date_created,
             'stock':product.stock,
@@ -39,6 +41,9 @@ def productSerialize(id):
             'name':product.name,
             'price':product.price,
             'category':product.category.all(),
+            'color':product.color.all(),
+            'size':product.size.all(),
+            'product_code':product.product_code,
             'description':product.description,
             'date_created':product.date_created,
             'stock':product.stock,
@@ -67,6 +72,9 @@ def productSerialize(id):
             'name':product.name,
             'price':product.price,
             'category':product.category.all(),
+            'color':product.color.all(),
+            'size':product.size.all(),
+            'product_code':product.product_code,
             'description':product.description,
             'date_created':product.date_created,
             'stock':product.stock,
@@ -100,6 +108,9 @@ def productSerialize(id):
             'name':product.name,
             'price':product.price,
             'category':product.category.all(),
+            'color':product.color.all(),
+            'size':product.size.all(),
+            'product_code':product.product_code,
             'description':product.description,
             'date_created':product.date_created,
             'stock':product.stock,
@@ -138,6 +149,9 @@ def productSerialize(id):
             'name':product.name,
             'price':product.price,
             'category':product.category.all(),
+            'color':product.color.all(),
+            'size':product.size.all(),
+            'product_code':product.product_code,
             'description':product.description,
             'date_created':product.date_created,
             'stock':product.stock,

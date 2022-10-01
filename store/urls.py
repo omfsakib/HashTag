@@ -12,4 +12,5 @@ app_name = 'store'
 
 urlpatterns = [
     path('',views.home,name="home"),
+    path('product_id=<str:pk>/',views.productView,name="product_view"),
 ]

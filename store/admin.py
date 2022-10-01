@@ -16,8 +16,11 @@ class ProductAdmin(admin.ModelAdmin):
         return "\n".join([p.name for p in obj.category.all()])
 
 admin.site.register(Category)
+admin.site.register(Size)
+admin.site.register(Color)
 admin.site.register(Review)
 admin.site.register(ProductImages)
+admin.site.register(IndivitualCategory)
 
 admin.site.site_header = "HashTag Admin Panel"
 admin.site.site_title = "HashTag Admin Portal"
