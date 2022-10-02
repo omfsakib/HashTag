@@ -1,0 +1,248 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<style>
+    .img-link img{
+        max-height: 90px;
+    }
+    .size-select{
+        border-radius: 4px !important;
+    }
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  margin-top: 5px;
+  width: auto;
+  min-width: 50px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-width: 100px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+/* Links inside the dropdown */
+.dropdown-content input {
+    margin-left: 3px;
+}
+.dropdown-content span{
+    margin-right: 3px;
+    font-size: 13px;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
+.table-responsive::-webkit-scrollbar {
+    display: none;
+}
+.text-right span{
+    font-size: 8px;
+}
+#button-coupon{
+    line-height: 7px;
+}
+</style>
+<script>
+    function cuponUpdate(cupon_code){
+        cupon = {'cupon_code':cupon_code}
+        document.cookie = 'cupon=' + JSON.stringify(cupon) + ";doamin=;path=/"
+        location.reload()
+    }
+</script>
+{% if cartItems <= 0 %}
+<div id="error-not-found" class="container">
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:cart' %}">Shopping Cart</a></li>
+    </ul>
+
+    <h1>Shopping Cart</h1>
+    <p>Your shopping cart is empty!</p>
+    <div class="buttons clearfix">
+        <div class="pull-right">
+            <a href="{% url 'store:home' %}" class="btn btn-primary">Continue</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div id="checkout-cart" class="container">
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:cart' %}">Shopping Cart</a></li>
+    </ul>
+    <div class="row">
+        <div id="content" class="col-sm-12">
+            <h1>Shopping Cart</h1>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <td class="text-center">Image</td>
+                            <td class="text-left">Product Name</td>
+                            <td class="text-left">Quantity</td>
+                            <td class="text-left">Size</td>
+                            <td class="text-left">Color</td>
+                            <td class="text-right">Unit Price</td>
+                            <td class="text-right">Total</td>
+                            <td class="text-left">Remove</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td class="text-center">
+                                 <a class="img-link" href="{% url 'store:product_view' item.product.id %}">
+                                    {% for i in item.image %}
+                                    <img src="{{i.n_img.url}}" alt="{{item.product.name}}" title="{{item.product.name}}" class="img-thumbnail">
+                                    {% endfor %}
+                                </a> 
+                            </td>
+                            <td class="text-left">
+                                <a href="{% url 'store:product_view' item.product.id %}">{{item.product.name}}</a>                                                 
+                            </td>
+                            <td class="text-left">
+                                <div class="input-group btn-block" style="max-width: 200px;">
+                                    <input type="text" disabled value="{{item.quantity}}" size="1" class="form-control">
+                                    <span class="input-group-btn">
+                                    <button type="button"  title="" class="btn btn-primary update-cart" data-toggle="tooltip" data-original-title="Increase" data-product="{{item.product.id}}" data-action="add"><i class="fa fa-angle-up" aria-hidden="true"></i></button>
+                                    <button type="button"  title="" class="btn btn-danger update-cart" data-toggle="tooltip" data-original-title="Decrease" data-product="{{item.product.id}}" data-action="remove"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-left">
+                                <div class="input-group btn-block" style="max-width: 200px;">
+                                    
+                                    <div class="dropdown">
+                                        {% for i in item.sizes %}
+                                            {% if item.size == i.size %}
+                                            <button type="submit" data-toggle="tooltip" title="" class="btn btn-primary dropbtn" data-original-title="Update">{{item.size}} <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class="dropdown-content">
+                                            {% for i in item.sizes %}
+                                            {% if item.size == i.size %}
+                                            <input type="checkbox" class="update-cart" data-product="{{item.product.id}}" data-action="size" checked data-size="{{i.size}}" ><span>{{i.size}}</span> </input> 
+                                             <br> 
+                                            {% else %}
+                                            <input type="checkbox" class="update-cart" data-product="{{item.product.id}}" data-action="size"  data-size="{{i.size}}" > <span>{{i.size}}</span> </input> 
+                                            <br> 
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                      </div>
+                                </div>
+                            </td>
+                            <td class="text-left">
+                                <div class="input-group btn-block" style="max-width: 200px;">
+                                    <div class="dropdown">
+                                        {% for i in item.colors %}
+                                            {% if item.color == i.color %}
+                                            <button type="submit" data-toggle="tooltip" title="" class="btn btn-primary dropbtn" data-original-title="Update">{{item.color}} <i class="fa fa-angle-down" aria-hidden="true"></i></button>
+
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class="dropdown-content">
+                                            {% for i in item.colors %}
+                                            {% if item.color == i.color %}
+                                            <input type="checkbox" class="update-cart" data-product="{{item.product.id}}" data-action="color" checked data-color="{{i.color}}" > <span>{{i.color}} </span></input> 
+                                             <br> 
+                                            {% else %}
+                                            <input type="checkbox" class="update-cart" data-product="{{item.product.id}}" data-action="color"  data-color="{{i.color}}" > <span>{{i.color}} </span> </input> 
+                                            <br> 
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                      </div>
+                                </div>
+                            </td>
+                            <td class="text-right">{{item.product.price|floatformat:2}}&#2547;</td>
+                            <td class="text-right">{{item.get_total|floatformat:2}}&#2547;</td>
+                            <td class="text-left"><button type="button" data-toggle="tooltip" title="" class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="remove" data-original-title="Remove"><i class="fa fa-times-circle"></i></button></td>
+                        </tr>
+                        {% endfor %}
+                                            
+                    </tbody>
+                    
+                </table>
+            </div>
+            <h2>What would you like to do next?</h2>
+            <p>Choose if you have a discount code or reward points you want to use or would like to estimate your delivery cost.</p>
+            <div class="panel-group" id="accordion">         
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a href="#collapse-coupon" class="accordion-toggle" data-toggle="collapse" data-parent="#accordion">
+                                Use Coupon Code 
+                                <i class="fa fa-caret-down"></i>
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapse-coupon" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <label class="col-sm-2 control-label" for="input-coupon">Enter your coupon here</label>
+                            <div >
+                                <form method="post" class="input-group" id="formId">
+                                    {% csrf_token %}
+                                    <input type="text" name="coupon" onchange="cuponUpdate(this.value)" value="" placeholder="Enter your coupon here" id="input-coupon" class="form-control">
+                                
+                                    <span class="input-group-btn">
+                                        <input type="submit" onClick='submitDetailsForm()'  data-toggle="tooltip" value="Apply Coupon" id="button-coupon" data-loading-text="Loading..." class="btn btn-primary">
+                                    </span>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-sm-4 col-sm-offset-8">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td class="text-right"><strong>Sub-Total:</strong></td>
+                                <td class="text-right">{{cartTotal|floatformat:2}}&#2547;</td>
+                            </tr>
+                            <tr>
+                                <td class="text-right"><strong>Charges<span>(Inside Dhaka)</span> :</strong></td>
+                                <td class="text-right">+ {{delivery_charge|floatformat:2}}&#2547;</td>
+                            </tr>
+                            {% if order.cupon_code != "None" %}
+                            <tr>
+                                <td class="text-right"><strong>Cupon<span>( {{order.cupon_code}} )</span> :</strong></td>
+                                <td class="text-right">- {{order.cupon_amount|floatformat:2}}&#2547;</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td class="text-right"><strong>Total:</strong></td>
+                                <td class="text-right">{{total|floatformat:2}}&#2547;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="buttons clearfix">
+                <div class="pull-left">
+                    <a href="{% url 'store:home' %}" class="btn btn-default">Continue Shopping</a>
+                </div>
+                <div class="pull-right">
+                    <a href="#" class="btn btn-primary">Checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<div class="container">
+    {% include 'components/memberDiscount.html' %}
+</div>
+{% endblock %}

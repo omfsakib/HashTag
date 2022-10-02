@@ -41,144 +41,146 @@
                         {% endfor %}
                     </div>
                 </div>
+                <script>
+                    $(document).ready(function() {
+                    $('.related-container').owlCarousel({
+                        items: 4,
+                        nav: true,
+                        dots: false,
+                        navSpeed: 1000,
+                        margin: 20,
+                        responsive:{
+                            0:{
+                                items: 1
+                            },
+                            481:{
+                                items: 2
+                            },
+                            769:{
+                                items: 2
+                            },
+                            1024:{
+                                items: 3
+                            },
+                            1200:{
+                                items: 4
+                            },
+                        },
+                        navText : ['<i class="ion-chevron-left"></i>','<i class="ion-chevron-right"></i>'],
+                    });
+                    var thumbnails_owl = $('#product-product .thumbnails-additional');	
+                    thumbnails_owl.on('initialize.owl.carousel initialized.owl.carousel ' +
+                        'initialize.owl.carousel initialize.owl.carousel ',
+                        function(e) {
+                        $("#product-product #gallery_01 .thumbnail").show();
+                        });
+                    thumbnails_owl.owlCarousel({
+                        items: 4,
+                        nav: true,
+                        dots: false,
+                        navSpeed: 1000,
+                        margin: 20,		
+                        navText : ['<i class="ion-chevron-left"></i>','<i class="ion-chevron-right"></i>'],				
+                    });	
+                    $("#product-product .thumbnails img").elevateZoom({		
+                        gallery : "gallery_01",
+                        galleryActiveClass: "active",
+                        borderColour: "#ee3333",
+                    });
+                    var thumbnails_additional = $('#product-product .thumbnails-additional .thumbnail');
+                    thumbnails_additional.each(function(){
+                        $(this).click(function(){
+                            thumbnails_additional.removeClass('current-additional');
+                            $(this).addClass('current-additional');
+                        });
+                    });
+                    var minimum = 1;
+                    $("#product-product #input-quantity").change(function(){
+                        if ($(this).val() < minimum) {
+                        alert("Minimum Quantity: "+minimum);
+                        $("#product-product #input-quantity").val(minimum);
+                        }
+                    });
+                    // increase number of product
+                    function minus(minimum){
+                        var currentval = parseInt($("#product-product #input-quantity").val());
+                        $("#product-product #input-quantity").val(currentval-1);
+                        if($("#product-product #input-quantity").val() <= 0 || $("#product-product #input-quantity").val() < minimum){
+                        alert("Minimum Quantity: "+minimum);
+                        $("#product-product #input-quantity").val(minimum);
+                        }
+                    };
+                    // decrease of product
+                    function plus(){
+                        var currentval = parseInt($("#product-product #input-quantity").val());
+                        $("#product-product #input-quantity").val(currentval+1);
+                    };
+                    $('#product-product #minus').click(function(){
+                        minus(minimum);
+                    });
+                    $('#product-product #plus').click(function(){
+                        plus();
+                    });
+                });
+            
+                </script>
+                <div class="col-sm-6 block-2">
+                    <h1 class="product-name">{{product.name}}</h1>
+                    <div class="ratings">
+                        <div class="rating-box">
+                            {% if product.rate <= 0 %}
+                            <div class="rating0">rating</div>
+                            {% elif product.rate <= 1 %}
+                            <div class="rating1">rating</div>
+                            {% elif product.rate <= 2 %}
+                            <div class="rating2">rating</div>
+                            {% elif product.rate <= 3 %}
+                            <div class="rating3">rating</div>
+                            {% elif product.rate <= 4 %}
+                            <div class="rating4">rating</div>
+                            {% elif product.rate <= 5 %}
+                            <div class="rating5">rating</div>
+                            {% endif %}
+                        </div>
+                        <a href="#" onclick="$('a[href=\'#tab-review\']').trigger('click'); $('body,html').animate({scrollTop: $('.block-3 .nav-tabs').offset().top}, 800); return false;">{{total_review}} reviews</a> / <a href="#" onclick="$('a[href=\'#tab-review\']').trigger('click'); $('body,html').animate({scrollTop: $('.block-3 .nav-tabs').offset().top}, 800); return false;">Write a review</a>
+                    </div>												            
+                    <ul class="list-unstyled">
+                        <li class="price">
+                            <span>&#2547;{{product.price}}</span>
+                        </li>
+                    </ul>
+                    <ul class="list-unstyled">
+                        <li>Product Code: <span class="ex-text">{{product.product_code}}</span></li>
+                        {% if product.stock > 0 %}
+                        <li>Availability: <span class="ex-text">In Stock</span></li>
+                        {% else %}
+                        <li>Availability: <span class="ex-text">Out Of Stock</span></li>
+                        {% endif %}
+                    </ul>          
+                    <div id="product"> 
+                        <div class="form-group">
+                            <label class="control-label" for="input-quantity">Qty</label>
+                            <div class="quantity-box">
+                                <input type="text" name="quantity" value="1" size="2" id="input-quantity" class="form-control" />
+                                <input type="button" id="plus" value="&#43;" class="form-control"/>
+                                <input type="button" id="minus" value="-" class="form-control" />					
+                            </div>
+                                <input type="hidden" name="product_id" value="{{product.id}}" />              
+                                <button type="button" id="button-cart" data-loading-text="Loading..." class="btn">
+                                    <i class="ion-bag"></i>Add to Cart
+                                </button>
+                            <div class="btn-actions">
+                                <button class="btn-wishlist" type="button" data-toggle="tooltip" class="btn btn-default" title="Add to Wish List" onclick="wishlist.add('36');"><i class="ion-android-favorite-outline"></i></button>
+                                <button class="btn-compare" type="button" data-toggle="tooltip" class="btn btn-default" title="Compare this Product" onclick="compare.add('36');"><i class="ion-android-options"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <script>
-        $(document).ready(function() {
-        $('.related-container').owlCarousel({
-            items: 4,
-            nav: true,
-            dots: false,
-            navSpeed: 1000,
-            margin: 20,
-            responsive:{
-                0:{
-                    items: 1
-                },
-                481:{
-                    items: 2
-                },
-                769:{
-                    items: 2
-                },
-                1024:{
-                    items: 3
-                },
-                1200:{
-                    items: 4
-                },
-            },
-            navText : ['<i class="ion-chevron-left"></i>','<i class="ion-chevron-right"></i>'],
-        });
-        var thumbnails_owl = $('#product-product .thumbnails-additional');	
-        thumbnails_owl.on('initialize.owl.carousel initialized.owl.carousel ' +
-            'initialize.owl.carousel initialize.owl.carousel ',
-            function(e) {
-            $("#product-product #gallery_01 .thumbnail").show();
-            });
-        thumbnails_owl.owlCarousel({
-            items: 4,
-            nav: true,
-            dots: false,
-            navSpeed: 1000,
-            margin: 20,		
-            navText : ['<i class="ion-chevron-left"></i>','<i class="ion-chevron-right"></i>'],				
-        });	
-        $("#product-product .thumbnails img").elevateZoom({		
-            gallery : "gallery_01",
-            galleryActiveClass: "active",
-            borderColour: "#ee3333",
-        });
-        var thumbnails_additional = $('#product-product .thumbnails-additional .thumbnail');
-        thumbnails_additional.each(function(){
-            $(this).click(function(){
-                thumbnails_additional.removeClass('current-additional');
-                $(this).addClass('current-additional');
-            });
-        });
-        var minimum = 1;
-        $("#product-product #input-quantity").change(function(){
-            if ($(this).val() < minimum) {
-            alert("Minimum Quantity: "+minimum);
-            $("#product-product #input-quantity").val(minimum);
-            }
-        });
-        // increase number of product
-        function minus(minimum){
-            var currentval = parseInt($("#product-product #input-quantity").val());
-            $("#product-product #input-quantity").val(currentval-1);
-            if($("#product-product #input-quantity").val() <= 0 || $("#product-product #input-quantity").val() < minimum){
-            alert("Minimum Quantity: "+minimum);
-            $("#product-product #input-quantity").val(minimum);
-            }
-        };
-        // decrease of product
-        function plus(){
-            var currentval = parseInt($("#product-product #input-quantity").val());
-            $("#product-product #input-quantity").val(currentval+1);
-        };
-        $('#product-product #minus').click(function(){
-            minus(minimum);
-        });
-        $('#product-product #plus').click(function(){
-            plus();
-        });
-    });
-
-    </script>
-    <div class="col-sm-6 block-2">
-        <h1 class="product-name">{{product.name}}</h1>
-        <div class="ratings">
-            <div class="rating-box">
-                {% if product.rate <= 0 %}
-                <div class="rating0">rating</div>
-                {% elif product.rate <= 1 %}
-                <div class="rating1">rating</div>
-                {% elif product.rate <= 2 %}
-                <div class="rating2">rating</div>
-                {% elif product.rate <= 3 %}
-                <div class="rating3">rating</div>
-                {% elif product.rate <= 4 %}
-                <div class="rating4">rating</div>
-                {% elif product.rate <= 5 %}
-                <div class="rating5">rating</div>
-                {% endif %}
-            </div>
-            <a href="#" onclick="$('a[href=\'#tab-review\']').trigger('click'); $('body,html').animate({scrollTop: $('.block-3 .nav-tabs').offset().top}, 800); return false;">{{total_review}} reviews</a> / <a href="#" onclick="$('a[href=\'#tab-review\']').trigger('click'); $('body,html').animate({scrollTop: $('.block-3 .nav-tabs').offset().top}, 800); return false;">Write a review</a>
-        </div>												            
-        <ul class="list-unstyled">
-            <li class="price">
-                <span>&#2547;{{product.price}}</span>
-            </li>
-        </ul>
-        <ul class="list-unstyled">
-            <li>Product Code: <span class="ex-text">{{product.product_code}}</span></li>
-            {% if product.stock > 0 %}
-            <li>Availability: <span class="ex-text">In Stock</span></li>
-            {% else %}
-            <li>Availability: <span class="ex-text">Out Of Stock</span></li>
-            {% endif %}
-        </ul>          
-        <div id="product"> 
-            <div class="form-group">
-                <label class="control-label" for="input-quantity">Qty</label>
-                <div class="quantity-box">
-                    <input type="text" name="quantity" value="1" size="2" id="input-quantity" class="form-control" />
-                    <input type="button" id="plus" value="&#43;" class="form-control"/>
-                    <input type="button" id="minus" value="-" class="form-control" />					
-                </div>
-                    <input type="hidden" name="product_id" value="{{product.id}}" />              
-                    <button type="button" id="button-cart" data-loading-text="Loading..." class="btn">
-                        <i class="ion-bag"></i>Add to Cart
-                    </button>
-                <div class="btn-actions">
-                    <button class="btn-wishlist" type="button" data-toggle="tooltip" class="btn btn-default" title="Add to Wish List" onclick="wishlist.add('36');"><i class="ion-android-favorite-outline"></i></button>
-                    <button class="btn-compare" type="button" data-toggle="tooltip" class="btn btn-default" title="Compare this Product" onclick="compare.add('36');"><i class="ion-android-options"></i></button>
-                </div>
-            </div>
-        </div>
-    </div>
+    
+    
     <div class="block-3 col-sm-12">
         <ul class="nav nav-tabs">
         <li class="active">

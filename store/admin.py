@@ -15,9 +15,14 @@ class ProductAdmin(admin.ModelAdmin):
     def get_category(self, obj):
         return "\n".join([p.name for p in obj.category.all()])
 
+
+admin.site.register(Order)
+admin.site.register(Delivery_charge)
 admin.site.register(Category)
+admin.site.register(OrderItem)
 admin.site.register(Size)
 admin.site.register(Color)
+admin.site.register(Cupon)
 admin.site.register(Review)
 admin.site.register(ProductImages)
 admin.site.register(IndivitualCategory)

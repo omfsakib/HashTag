@@ -1,9 +1,25 @@
+{% load static %}
+
+<style>
+    #logo a img {
+        width: 85px;
+    }
+    #logo{
+        margin-top: -15px;
+    }
+    .has-scroll .table tbody tr td a img{
+        max-width: 55px;
+    }
+    .text-left span{
+        font-size: 10px;
+    }
+</style>
 <header>
 	<div class="container-fix">
         <div class="logo-container pull-left">
             <div id="logo">
-                <a href="http://mimosa4.demo.towerthemes.com/index.php?route=common/home">
-                    <img src="http://mimosa4.demo.towerthemes.com/image/catalog/logo.png" title="Mimosa 4" alt="Mimosa 4" class="img-responsive" />
+                <a href="{% url 'store:home' %}">
+                    <img src="{% static 'images/Logo-Light.png' %}" title="H A S H T A G" alt="H A S H T A G" class="img-responsive" />
                 </a>
             </div>
         </div>
@@ -21,10 +37,10 @@
                                 <div id="top-links">
                                     <ul class="ul-account list-unstyled">
                                         <li>
-                                            <a id="a-register-link" href="http://mimosa4.demo.towerthemes.com/index.php?route=account/register">Register</a>
+                                            <a id="a-register-link" href="#">Register</a>
                                         </li>
                                         <li>
-                                            <a id="a-login-link" href="http://mimosa4.demo.towerthemes.com/index.php?route=account/login">Login</a>
+                                            <a id="a-login-link" href="#">Login</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -37,12 +53,64 @@
                 <div id="cart" class="btn-group btn-block">
                     <button type="button" data-toggle="dropdown" data-loading-text="Loading..." class="btn dropdown-toggle">
                         <i class="ion-bag"></i> 
-                        <span id="cart-total">0</span>
+                        <span id="cart-total">{{cartItems}}</span>
                     </button>
                     <ul class="dropdown-menu pull-right">
+                        {% if cartItems <= 0 %}
                         <li>
                             <p class="text-center cart-empty">Your shopping cart is empty!</p>
                         </li>
+                        {% else %}
+                        <li class="has-scroll">
+                            <table class="table">
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <a href="{% url 'store:product_view' item.product.id %}">
+                                                {% for i in item.image %}
+                                                <img class="cart-image" src="{{i.n_img.url}}" alt="{{item.product.name}}" title="{{item.product.name}}">
+                                                {% endfor %}
+                                            </a> 
+                                        </td>
+                                        <td class="text-left info-item">
+                                            <a href="{% url 'store:product_view' item.product.id %}">{{item.product.name}}</a>
+                                            <p class="cart-quantity">×{{item.quantity}}</p>
+                                            <p class="cart-price">&#2547;{{item.product.price}}</p>
+                                        </td>          
+                                        <td class="text-center cart-close">
+                                            <button type="button" data-product="{{item.product.id}}" data-action="delete" title="Remove" class="btn btn-danger update-cart btn-xs">
+                                                <i class="ion-android-close"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}     
+                                </tbody>
+                            </table>
+                        </li>
+                        <li>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left">Sub-Total :</td>
+                                        <td class="text-right">&#2547;{{cartTotal}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left">Charges<span>(Inside Dhaka)</span> :</td>
+                                        <td class="text-right">&#2547;{{delivery_charge}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left">Total :</td>
+                                        <td class="text-right">&#2547;{{total}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="text-center cart-button">
+                                <a href="{% url 'store:cart' %}">View Cart</a>
+                                <a href="#">Checkout</a>
+                            </p>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -87,16 +155,16 @@
 				
 					                <ul id="ma-mobilemenu" class="mobilemenu nav-collapse collapse">
                                         <li class="had_child">
-                                            <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/category&amp;path=25">Men</a>
+                                            <a href="#">Men</a>
                                         </li>
                                         <li class="no_child">
-                                            <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/category&amp;path=57">Accessories</a>
+                                            <a href="#">Accessories</a>
                                         </li>
                                         <li class="had_child">
-                                            <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/category&amp;path=20">Women</a>
+                                            <a href="#">Women</a>
                                         </li>
                                         <li>
-                                            <a href="index.php?route=blog/blog">
+                                            <a href="#">
                                                 <span>Blog </span>
                                             </a>
                                         </li>
@@ -110,7 +178,7 @@
 		                <div id="pt_custommenu" class="pt_custommenu">
 				            <div id="pt_menu_home" class="pt_menu">
                                 <div class="parentMenu">
-                                    <a href="http://mimosa4.demo.towerthemes.com/index.php?route=common/home">
+                                    <a href="{% url 'store:home' %}">
                                         <span>Home</span>
                                     </a>
                                 </div>
