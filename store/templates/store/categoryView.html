@@ -1,0 +1,27 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<script type="text/javascript">
+    document.body.classList.add(
+        'product-category',
+        'home4',
+        'group1'
+        );
+</script>
+
+<form method="POST">
+    {% csrf_token %}
+<div class="container layer-category">
+    <h2 class="category-name">{{selectedCategory.name}}</h2>
+    <input type="hidden" id="category_id" value="{{selectedCategory.id}}">
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:category_view' selectedCategory.id %}">{{selectedCategory.name}}</a></li>
+    </ul>
+    {% include 'components/sortProducts.html' %}
+</div>
+
+
+</form>
+{% endblock %}

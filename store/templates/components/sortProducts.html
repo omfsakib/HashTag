@@ -1,0 +1,539 @@
+<style>
+    ::selection{
+  color: #fff;
+  background: #ee3333;
+}
+
+.price-input {
+  width: 100%;
+  display: flex;
+  margin: 30px 0 35px;
+}
+.price-input .field{
+  display: flex;
+  width: 100%;
+  height: 45px;
+  align-items: center;
+}
+.field input{
+  width: 100%;
+  height: 100%;
+  outline: none;
+  font-size: 10px;
+  border: none !important;
+  text-align: left;
+  border: 1px solid #999;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+.price-input .separator{
+  width: 130px;
+  display: flex;
+  font-size: 19px;
+  align-items: center;
+}
+.slider{
+  height: 5px;
+  position: relative;
+  background: #ddd;
+  border-radius: 5px;
+}
+.slider .progress{
+  height: 100%;
+  left: 25%;
+  right: 25%;
+  position: absolute;
+  border-radius: 5px;
+  background: #ee3333;
+}
+.range-input{
+  position: relative;
+}
+.range-input input{
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  top: -5px;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+input[type="range"]::-webkit-slider-thumb{
+  height: 17px;
+  width: 17px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ee3333;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  box-shadow: 0 0 6px rgba(0,0,0,0.05);
+}
+input[type="range"]::-moz-range-thumb{
+  height: 17px;
+  width: 17px;
+  border: none;
+  border-radius: 50%;
+  border: 1px solid #ee3333;
+  background: #fff;
+  pointer-events: auto;
+  -moz-appearance: none;
+  box-shadow: 0 0 6px rgba(0,0,0,0.05);
+}
+.product-list .product-des {
+    -webkit-line-clamp: 4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+<script type="text/javascript">
+        $(document).ready(function(){
+            $("#input-sort").change(function() {
+                this.form.submit();
+            });
+            const minPrice = $('#id_start_price').val()
+            const maxPrice = $('#id_end_price').val()
+            var max = 10000
+            range = document.querySelector(".slider .progress");
+            range.style.left = ((minPrice / max) * 100) + "%";
+            range.style.right = 100 - (maxPrice / max) * 100 + "%";
+        })
+</script>
+<div class="toolbar">
+    <div class="col-md-2 toolbar3 pull-left">
+        <div class="btn-group">
+            <button type="button" id="list-view" class="btn btn-default"><i class="fa fa-th-list"></i></button>
+            <button type="button" id="grid-view" class="btn btn-default selected"><i class="fa fa-th"></i></button>
+        </div>
+    </div>
+    <div class="col-md-2 toolbar1 pull-right">
+            <select id="input-sort" name="sort-details" class="form-control">
+                {% if necessaryItems.sort_details == 'default' %}
+                <option value="default" selected="selected">Sort By:Default</option>
+                <option value="name_a_z">Sort By:Name (A - Z)</option>
+                <option value="name_z_a">Sort By:Name (Z - A)</option>
+                <option value="price_l_h">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l">Sort By:Rating (Highest)</option>
+                <option value="rate_l_h">Sort By:Rating (Lowest)</option>
+
+                {% elif necessaryItems.sort_details == 'name_a_z' %}
+                <option value="default">Sort By:Default</option>
+                <option value="name_a_z" selected="selected">Sort By:Name (A - Z)</option>
+                <option value="name_z_a">Sort By:Name (Z - A)</option>
+                <option value="price_l_h">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l">Sort By:Rating (Highest)</option>
+                <option value="rate_l_h">Sort By:Rating (Lowest)</option>
+
+                {% elif necessaryItems.sort_details == 'name_z_a' %}
+                <option value="default">Sort By:Default</option>
+                <option value="name_a_z">Sort By:Name (A - Z)</option>
+                <option value="name_z_a" selected="selected">Sort By:Name (Z - A)</option>
+                <option value="price_l_h">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l">Sort By:Rating (Highest)</option>
+                <option value="rate_l_h">Sort By:Rating (Lowest)</option>
+
+                {% elif necessaryItems.sort_details == 'price_l_h' %}
+                <option value="default">Sort By:Default</option>
+                <option value="name_a_z" >Sort By:Name (A - Z)</option>
+                <option value="name_z_a">Sort By:Name (Z - A)</option>
+                <option value="price_l_h" selected="selected">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l">Sort By:Rating (Highest)</option>
+                <option value="rate_l_h">Sort By:Rating (Lowest)</option>
+
+                {% elif necessaryItems.sort_details == 'price_h_l' %}
+                <option value="default">Sort By:Default</option>
+                <option value="name_a_z">Sort By:Name (A - Z)</option>
+                <option value="name_z_a">Sort By:Name (Z - A)</option>
+                <option value="price_l_h">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l" selected="selected">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l" >Sort By:Rating (Highest)</option>
+                <option value="rate_l_h">Sort By:Rating (Lowest)</option>
+                
+                {% elif necessaryItems.sort_details == 'rate_h_l' %}
+                <option value="default">Sort By:Default</option>
+                <option value="name_a_z" >Sort By:Name (A - Z)</option>
+                <option value="name_z_a">Sort By:Name (Z - A)</option>
+                <option value="price_l_h">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l"selected="selected">Sort By:Rating (Highest)</option>
+                <option value="rate_l_h" >Sort By:Rating (Lowest)</option>
+                
+                {% elif necessaryItems.sort_details == 'rate_l_h' %}
+                <option value="default">Sort By:Default</option>
+                <option value="name_a_z">Sort By:Name (A - Z)</option>
+                <option value="name_z_a">Sort By:Name (Z - A)</option>
+                <option value="price_l_h">Sort By:Price (Low &gt; High)</option>
+                <option value="price_h_l">Sort By:Price (High &gt; Low)</option>
+                <option value="rate_h_l">Sort By:Rating (Highest)</option>
+                <option value="rate_l_h" selected="selected">Sort By:Rating (Lowest)</option>
+                {%endif%}
+            </select>
+    </div>
+    <div class="col-md-2 toolbar2 pull-right">
+        <select id="input-limit" class="form-control">
+            <option value="9" selected="selected">Show:9</option>
+            <option value="25">Show:25</option>
+            <option value="50">Show:50</option>
+            <option value="75">Show:75</option>
+            <option value="100">Show:100</option>
+        </select>
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+    <aside id="column-left" class="col-sm-12 col-md-3">
+        {% if categoryWithDetailedProduct%}
+        <div class="category-module" style="padding-bottom: 10px; margin-bottom: 15px;">
+            <h3>Categories</h3>
+            <ul class="list-unstyled">
+                {% for i in categoryWithDetailedProduct %}
+                {% if i.id == selectedCategory.id %}
+                <li><a href="{% url 'store:category_view' i.id %}" class="active">{{i.name}} ({{i.hasProducts}})</a></li>
+                {% else %}
+                <li><a href="{% url 'store:category_view' i.id %}" class="">{{i.name}} ({{i.hasProducts}})</a></li>
+                {% endif %}
+                {% endfor %}
+             </ul>
+        </div>
+        {% endif %}
+        <div class="price-slider">
+            <h4>Price Range</h4>
+            <div class="price-input">
+                <div class="field">
+                    <span>&#2547;</span>
+                    <input type="number" class="input-min" value="{{necessaryItems.pricedetails.start_price}}" >
+                    </div>
+                    <div class="separator">-</div>
+                    <div class="field">
+                    <span>&#2547;</span>
+                    <input type="number" class="input-max" value="{{necessaryItems.pricedetails.end_price}}" >
+                </div>
+            </div>
+            <div class="slider">
+                <div class="progress"></div>
+            </div>
+        
+                <div class="range-input">
+                    <input type="range" class="range-min" min="0" max="10000" value="{{necessaryItems.pricedetails.start_price}}" step="100" name="start_price" id="id_start_price">
+                    <input type="range" class="range-max" min="0" max="10000" value="{{necessaryItems.pricedetails.end_price}}" step="100" name="end_price" id="id_end_price">
+                </div>
+            <script>
+                $(function(){
+                    $('#id_start_price').on('change', function () {
+                        this.form.submit()
+                    });
+                    $('#id_end_price').on('change', function () {
+                        this.form.submit()
+                    });
+                });
+                const rangeInput = document.querySelectorAll('.range-input input');
+                rangeInput.forEach(input =>{
+                    input.addEventListener("input" ,()=>{
+                        const rangeInput = document.querySelectorAll(".range-input input"),
+                        priceInput = document.querySelectorAll(".price-input input"),
+                        range = document.querySelector(".slider .progress");
+                        let priceGap = 500;
+                        priceInput.forEach(input =>{
+                            input.addEventListener("input", e =>{
+                                let minPrice = parseInt(priceInput[0].value),
+                                maxPrice = parseInt(priceInput[1].value);
+                                
+                                if((maxPrice - minPrice >= priceGap) && maxPrice <= rangeInput[1].max){
+                                    if(e.target.className === "input-min"){
+                                        rangeInput[0].value = minPrice;
+                                        range.style.left = ((minPrice / rangeInput[0].max) * 100) + "%";
+                                    }else{
+                                        rangeInput[1].value = maxPrice;
+                                        range.style.right = 100 - (maxPrice / rangeInput[1].max) * 100 + "%";
+                                    }
+                                }
+                            });
+                        });
+                        rangeInput.forEach(input =>{
+                            input.addEventListener("input", e =>{
+                                let minVal = parseInt(rangeInput[0].value),
+                                maxVal = parseInt(rangeInput[1].value);
+                                if((maxVal - minVal) < priceGap){
+                                    if(e.target.className === "range-min"){
+                                        rangeInput[0].value = maxVal - priceGap
+                                    }else{
+                                        rangeInput[1].value = minVal + priceGap;
+                                    }
+                                }else{
+                                    priceInput[0].value = minVal;
+                                    priceInput[1].value = maxVal;
+                                    range.style.left = ((minVal / rangeInput[0].max) * 100) + "%";
+                                    range.style.right = 100 - (maxVal / rangeInput[1].max) * 100 + "%";
+                                }
+                            });
+                            
+                        });
+                    })
+                })
+            </script>
+        </div>
+    </aside>
+    <div id="content" class="col-md-9 col-sm-12">
+        <div class="category-info"></div>
+        <h3>Refine Search</h3>
+        <div class="custom-category">
+            <div>
+                <a href="#" id="compare-total">Product Compare (0)</a>
+            </div>
+            <div class="custom-products custom-products-row" id="paginate">
+                {% for i in products %}
+                <div class="product-layout product-grid col-md-4 col-sm-6 col-xs-6 three-items ">
+                    <div class="product-thumb">
+                        <div class="image">
+                            <a href="{% url 'store:product_view' i.id %}">
+                                <img src="{{i.image_1}}" alt="{{i.name}}" title="{{i.name}}" class="img-responsive">
+                                <img class="img-r" src="{{i.image_2}}" alt="{{i.name}}" title="{{i.name}}">								
+                            </a>
+                            <div class="action-links">
+                                <button class="btn-cart update-cart" type="button" data-product={{i.id}} data-size="{{i.first_size}}" data-color="{{i.first_color}}" data-action="add" title="Add to Cart">
+                                    <i class="ion-bag"></i>
+                                    <span>Add to Cart</span>
+                                </button>
+                                <button class="btn-wishlist" type="button" data-toggle="tooltip" title="Add to Wish List">
+                                    <i class="ion-android-favorite-outline"></i>
+                                    <span>Add to Wish List</span>
+                                </button>
+                                <button class="btn-compare" type="button" data-toggle="tooltip" title="Compare this Product">
+                                    <i class="ion-android-options"></i>
+                                    <span>Compare this Product</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="caption">
+                            <p class="manufacture-product">
+                                <a href="{% url 'store:product_view' i.id %}">{{i.product_code}}</a>
+                            </p>
+                            <div class="ratings">
+                                <div class="rating-box">
+                                    {% if i.rate <= 0 %}
+                                    <div class="rating0">rating</div>
+                                    {% elif i.rate <= 1 %}
+                                    <div class="rating1">rating</div>
+                                    {% elif i.rate <= 2 %}
+                                    <div class="rating2">rating</div>
+                                    {% elif i.rate <= 3 %}
+                                    <div class="rating3">rating</div>
+                                    {% elif i.rate <= 4 %}
+                                    <div class="rating4">rating</div>
+                                    {% elif i.rate <= 5 %}
+                                    <div class="rating5">rating</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <h4 class="product-name">
+                                <a href="{% url 'store:product_view' i.id %}">{{ i.name }}</a>
+                            </h4>                  
+                            <p class="price">&#2547;{{i.price}}</p>
+                            <p class="product-des">{{i.description}}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="row toolbar4">
+                <div class="col-sm-6">
+                    <ul class="pagination">
+                        <!-- <li class="active">
+                            <span>1</span>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);" >&gt;|</a>
+                        </li> -->
+                    </ul>
+                </div>
+                <div class="col-sm-6 text-right">Showing 1 to <span class="total-products-shown"></span> of <span class="total-products"></span> (<span class="total-pages"></span> Pages)</div>
+            </div>
+            
+            <script>
+                var table = '#paginate'
+                var rowMax = $('#input-limit').val()
+                $('.total-products-shown').text(rowMax)
+                var rowNum = 0
+                var rowsTotal = $(table).find('.product-layout').length;
+                $('.total-products').text(rowsTotal)
+                $('div.product-layout').each(function(){
+                    rowNum++
+                    if(rowNum > rowMax){
+                        $(this).hide()
+                    }
+                    if(rowNum <= rowMax){
+                        $(this).show()
+                    }
+                })
+                if(rowsTotal > rowMax){
+                    var numpage = Math.ceil(rowsTotal/rowMax)
+                    $('.total-pages').text(numpage)
+                    for (var i = 1; i <= numpage;){
+                        $('.pagination').append('<li class="numbers" data-page="'+i+'">\<span>'+ i++ + '</span>\</li>').show()
+                    }
+                    if(numpage > 3){
+                        $('.pagination> li:not(:lt(3))').hide();
+                    }
+                }else{
+                    $('.pagination').append('<li class="numbers" data-page="'+1+'">\<span>'+ 1 + '</span>\</li>').show()
+                }
+                var currentPage = 1
+                $('.pagination').append('<li class="symbol-one">\<a >&gt;</a>\</li>').show()
+                $('.pagination').append('<li class="symbol-two">\<a >&gt;|</a>\</li>').show()
+                $('.pagination li:first-child').addClass('active')
+                $('.pagination .symbol-one').on('click',function(){
+                    
+                    var pageNumber = Math.ceil((rowsTotal/rowMax))
+                    $('.total-pages').text(pageNumber)
+                    if(pageNumber > currentPage){
+                        $('.pagination li').removeClass('active')
+                        $('.pagination .numbers:eq(' + currentPage + ')').addClass('active')
+                        currentPage++
+                        var indexTr = 0;
+                        $('div.product-layout').each(function (){
+                            indexTr++ 
+                            if(indexTr > (rowMax*currentPage) || indexTr <= ((rowMax*currentPage)-rowMax)){
+                                $(this).hide()
+                            }else{
+                                $(this).show()
+                            }
+                        })
+                    }
+                    
+                })
+
+                $('.pagination .symbol-two').on('click',function(){
+                    $('.pagination li').removeClass('active')
+                    var pageNumber = Math.ceil((rowsTotal/rowMax)-1)
+                    $('.pagination .numbers:eq(' + pageNumber + ')').addClass('active')
+                    var pageNumber = Math.ceil(rowsTotal/rowMax)
+                    $('.total-pages').text(pageNumber)
+                    var indexTr = 0;
+                    $('div.product-layout').each(function (){
+                        indexTr++ 
+                        if(indexTr > (rowMax*pageNumber) || indexTr <= ((rowMax*pageNumber)-rowMax)){
+                            $(this).hide()
+                        }else{
+                            $(this).show()
+                        }
+                    })
+                })
+
+                $('.pagination .numbers').on('click',function(){
+                    var numPage = $(this).attr('data-page')
+                    currentPage = numPage
+                    var indexTr = 0;
+                    $('.pagination .numbers').removeClass('active')
+                    $(this).addClass('active')
+                    $('div.product-layout').each(function (){
+                        indexTr++ 
+                        if(indexTr > (rowMax*numPage) || indexTr <= ((rowMax*numPage)-rowMax)){
+                            $(this).hide()
+                        }else{
+                            $(this).show()
+                        }
+                    })
+                    
+                })
+                $('#input-limit').on('change',function(){
+                    if($(this).val() < rowsTotal){
+                        $('.total-products-shown').text($(this).val())
+                    }else{
+                        $('.total-products-shown').text(rowsTotal)
+                    }
+                    $('.pagination').html('')
+                    var trnum = 0
+                    var maxRows = parseInt($(this).val())
+                    var totalRows = $(table).find('.product-layout').length;
+                    $('div.product-layout').each(function(){
+                        trnum++
+                        if(trnum > maxRows){
+                            $(this).hide()
+                        }
+                        if(trnum <= maxRows){
+                            $(this).show()
+                        }
+                    })
+                    if(totalRows > maxRows){
+                        var pagenum = Math.ceil(totalRows/maxRows)
+                        $('.total-pages').text(pagenum)
+                        for (var i = 1; i <= pagenum;){
+                            $('.pagination').append('<li class="numbers" data-page="'+i+'">\<span>'+ i++ + '</span>\</li>').show()
+                        } if(pagenum > 3){
+                            $('.pagination> li:not(:lt(3))').hide();
+                        }
+                    }else{
+                        $('.total-pages').text('1')
+                        $('.pagination').append('<li class="numbers" data-page="'+1+'">\<span>'+ 1 + '</span>\</li>').show()
+                    }
+                    var currentPage = 1
+                    $('.pagination').append('<li class="symbol-one">\<a >&gt;</a>\</li>').show()
+                    $('.pagination').append('<li class="symbol-two">\<a >&gt;|</a>\</li>').show()
+                    $('.pagination li:first-child').addClass('active')
+                    $('.pagination .symbol-one').on('click',function(){
+                    
+                        var pageNumber = Math.ceil((totalRows/maxRows))
+                        $('.total-pages').text(pageNumber)
+                        if(pageNumber > currentPage){
+                            $('.pagination li').removeClass('active')
+                            $('.pagination li:eq(' + currentPage + ')').addClass('active')
+                            currentPage++
+                            var indexTr = 0;
+                            $('div.product-layout').each(function (){
+                                indexTr++ 
+                                if(indexTr > (maxRows*currentPage) || indexTr <= ((maxRows*currentPage)-maxRows)){
+                                    $(this).hide()
+                                }else{
+                                    $(this).show()
+                                }
+                            })
+                        }
+                        
+                    })
+                    $('.pagination .symbol-two').on('click',function(){
+                        var pageNumber = Math.ceil((totalRows/maxRows))
+                        $('.total-pages').text(pageNumber)
+                        if (pageNumber > currentPage){
+                            $('.pagination li').removeClass('active')
+                            $('.pagination li:eq(' + (pageNumber-1) + ')').addClass('active')
+                            var indexTr = 0;
+                            $('div.product-layout').each(function (){
+                                indexTr++ 
+                                if(indexTr > (maxRows*pageNumber) || indexTr <= ((maxRows*pageNumber)-maxRows)){
+                                    $(this).hide()
+                                }else{
+                                    $(this).show()
+                                }
+                            })
+                        }
+                        
+                    })
+                    $('.pagination .numbers').on('click',function(){
+                        var pageNum = $(this).attr('data-page')
+                        currentPage = pageNum
+                        var trIndex = 0;
+                        $('.pagination li').removeClass('active')
+                        $(this).addClass('active')
+                        $('div.product-layout').each(function (){
+                            trIndex++ 
+                            if(trIndex > (maxRows*pageNum) || trIndex <= ((maxRows*pageNum)-maxRows)){
+                                $(this).hide()
+                            }else{
+                                $(this).show()
+                            }
+                        })
+                    })
+                })
+            </script>
+        </div>
+    </div>
+</div>

@@ -148,24 +148,7 @@ $(document).ready(function() {
 		$('#form-language').submit();
 	});
 
-	/* Search */
-	$('#search input[name=\'search\']').parent().find('button').on('click', function() {
-		var url = $('base').attr('href') + 'index.php?route=product/search';
-
-		var value = $('header #search input[name=\'search\']').val();
-
-		if (value) {
-			url += '&search=' + encodeURIComponent(value);
-		}
-
-		location = url;
-	});
-
-	$('#search input[name=\'search\']').on('keydown', function(e) {
-		if (e.keyCode == 13) {
-			$('header #search input[name=\'search\']').parent().find('button').trigger('click');
-		}
-	});
+	
 
 	// Menu
 	$('#menu .dropdown-menu').each(function() {

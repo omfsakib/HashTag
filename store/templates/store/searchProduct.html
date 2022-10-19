@@ -1,0 +1,60 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    document.body.classList.add(
+        'product-search',
+        'home4',
+        'group1'
+        );
+    $(document).ready(function(){
+        
+	    $('.breadcrumb').before($('.heading-title'));
+    })
+
+
+</script>
+
+
+<div id="product-search" class="container">
+            
+    <h2 class="heading-title">Search</h2>
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:search_product' searchText %}">Search</a></li>
+    </ul>
+    <div class="row">
+        <div id="content" class="col-sm-12">
+            <form  method="POST">
+                {% csrf_token %}
+                <h1>Search - {{searchText}}</h1>
+                <label class="control-label" for="input-search">Search Criteria</label>
+                <div class="row">
+                    <div class="col-sm-5">
+                        <input type="text" name="search" value="{{searchText}}" placeholder="Keywords" id="input-search" class="form-control">
+                    </div>
+                    <div class="col-sm-4">
+                        <select name="category_id" class="form-control">
+                            {% for i in categorys %}
+                            <option value="{{i.id}}">{{i.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <p>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" name="description" id="description">
+                        Search in product descriptions
+                    </label>
+                </p>
+                <input type="submit" value="Search" id="button-search" class="btn btn-primary">
+            </form>
+
+            <form method="POST">
+                {% csrf_token %}
+                {% include 'components/sortProducts.html' %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

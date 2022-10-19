@@ -166,7 +166,7 @@
                             </td>
                             <td class="text-right">{{item.product.price|floatformat:2}}&#2547;</td>
                             <td class="text-right">{{item.get_total|floatformat:2}}&#2547;</td>
-                            <td class="text-left"><button type="button" data-toggle="tooltip" title="" class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="remove" data-original-title="Remove"><i class="fa fa-times-circle"></i></button></td>
+                            <td class="text-left"><button type="button" data-toggle="tooltip" title="" class="btn btn-danger update-cart" data-product="{{item.product.id}}" data-action="delete" data-original-title="Remove"><i class="fa fa-times-circle"></i></button></td>
                         </tr>
                         {% endfor %}
                                             
@@ -235,7 +235,7 @@
                     <a href="{% url 'store:home' %}" class="btn btn-default">Continue Shopping</a>
                 </div>
                 <div class="pull-right">
-                    <a href="#" class="btn btn-primary">Checkout</a>
+                    <a href="{% url 'store:checkout' %}" class="btn btn-primary">Checkout</a>
                 </div>
             </div>
         </div>

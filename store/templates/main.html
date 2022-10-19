@@ -7,10 +7,45 @@
     <title>H A S H T A G</title>
 
     {% include 'components/links.html' %}
+    <style>
+        
+        #preloader {
+            background-color: #ffffff73;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+        }
 
+        #status {
+            background-image: url('/static/images/AjaxLoader.gif');
+            background-repeat: no-repeat;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-top: -35px;
+            margin-left: -35px;
+        }
+    </style>
+    <script>
+        /* =========================================
+                Preloader
+        ============================================ */
+        $(window).on('load', function () { // makes sure that whole site is loaded
+            $('#status').fadeOut();
+            $('#preloader').delay(350).fadeOut('slow');
+        });
+    </script>
 </head>
 <body>
-    <div class="wrapper">
+    <div id="preloader">
+        <div id="status">&nbsp;</div>
+    </div>
+        <div class="wrapper">
 
         {% include 'components/header.html' %}
                                     

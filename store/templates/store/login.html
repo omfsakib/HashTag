@@ -1,0 +1,80 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        
+	    $('.breadcrumb').before($('.heading-title'));
+    })
+
+
+</script>
+
+<div class="container" style="display: flex;background: #f6f6f6;padding: 50px;align-items: center;justify-content: center;margin-bottom: 60px;">
+    <h2 class="heading-title">Login</h2>
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:login' %}">Login</a></li>
+    </ul>
+    <div class="account-login" style="
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+">
+        <div class="page-title">
+            <h1>Login or create an account</h1>
+        </div>
+        <div class="ajax-content">
+            <div class="ajax-container">
+                <div class="login-form-content">
+                    <h2>Returning Customer</h2>
+                    <p><strong>I am a returning customer</strong></p>
+                    <form method="POST" id="ajax-login-form">
+                        {% csrf_token %}
+                        <div class="form-group required">
+                            <label class="control-label" for="input-phone">Username/Phone number</label>
+                            <input type="text" name="login_username" placeholder="Username/Phone Number" id="input-phone" class="form-control" />
+                        </div>
+                        <div class="form-group required">
+                            <label class="control-label" for="input-password">Password</label>
+                            <input type="password" name="login_password"  placeholder="Password" id="input-password" class="form-control" />
+                            <a class="forgotten" href="">Forgotten Password</a>
+                        </div>
+                        <div class="action">
+                            <button class="button" type="submit">
+                                <span>Login</span>
+                            </button>
+                            <button class="button" type="button">
+                                <span>Create an account</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- <script type="text/javascript">
+                $(document).ready(function () {
+                    var keycode = '';
+
+                    $('#input-email').keypress(function (e) {
+                        keycode = (e.keyCode ? e.keyCode : e.which);
+                        if(keycode == '13') {
+                            ocajaxlogin.loginAction(ocajaxlogin.loginAction(document.getElementById('input-email').value, document.getElementById('input-password').value));
+                        }
+                    });
+
+                    $('#input-password').keypress(function (e) {
+                        keycode = (e.keyCode ? e.keyCode : e.which);
+                        if(keycode == '13') {
+                            ocajaxlogin.loginAction(ocajaxlogin.loginAction(document.getElementById('input-email').value, document.getElementById('input-password').value));
+                        }
+                    });
+                });
+
+            </script> -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}

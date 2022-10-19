@@ -14,6 +14,24 @@
         font-size: 10px;
     }
 </style>
+<script>
+    $(document).ready(function() {
+        /* Search */
+        $('#search input[name=\'search\']').parent().find('button').on('click', function() {
+            var base = 'http://127.0.0.1:8000/'
+            var url =  base + 'product/search';
+
+            var value = $('header #search input[name=\'search\']').val();
+
+            if (value) {
+                url += '=' + encodeURIComponent(value);
+            }
+
+            location =  url;
+        });
+    })
+    
+</script>
 <header>
 	<div class="container-fix">
         <div class="logo-container pull-left">
@@ -34,16 +52,30 @@
                         <li>
                             <div>
                                 <span class="text-ex">My Account</span>
+                                {% if request.user.is_authenticated %}
+                                <div class="profile">
+                                    <div class="row">
+                                        <div class="col-sm-6" style="width: auto;">
+                                            <img style="height: 50px; float:right;" src="{{request.user.customer.profile_pic.url}}" alt="">
+                                        </div>
+                                        <div class="col-sm-6" style="padding-left: 0px;">
+                                            <a href="" style="margin-top: 10px;">{{request.user.first_name}} {{request.user.last_name}}</a>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'store:logout' %}" class="btn btn-sm btn-primary">Logout</a>
+                                </div>
+                                {% else %}
                                 <div id="top-links">
                                     <ul class="ul-account list-unstyled">
                                         <li>
                                             <a id="a-register-link" href="#">Register</a>
                                         </li>
                                         <li>
-                                            <a id="a-login-link" href="#">Login</a>
+                                            <a id="a-login-link" href="{% url 'store:login' %}">Login</a>
                                         </li>
                                     </ul>
                                 </div>
+                                {% endif %}
                             </div>
                         </li>
                     </ul>
@@ -107,7 +139,7 @@
                             </table>
                             <p class="text-center cart-button">
                                 <a href="{% url 'store:cart' %}">View Cart</a>
-                                <a href="#">Checkout</a>
+                                <a href="{% url 'store:checkout' %}">Checkout</a>
                             </p>
                         </li>
                         {% endif %}
@@ -135,6 +167,7 @@
                         });
                     });
                 </script>
+               
             </div>			
         </div>	
 	    <div class="container">
@@ -154,20 +187,11 @@
                                     </div>
 				
 					                <ul id="ma-mobilemenu" class="mobilemenu nav-collapse collapse">
-                                        <li class="had_child">
-                                            <a href="#">Men</a>
-                                        </li>
-                                        <li class="no_child">
-                                            <a href="#">Accessories</a>
-                                        </li>
-                                        <li class="had_child">
-                                            <a href="#">Women</a>
-                                        </li>
+                                        {% for i in nvCategorys %}
                                         <li>
-                                            <a href="#">
-                                                <span>Blog </span>
-                                            </a>
+                                            <a href="{% url 'store:category_view' i.id %}">{{i.name}}</a>
                                         </li>
+                                        {% endfor %}
                                     </ul> 
 				
 			                    </div>
@@ -183,48 +207,19 @@
                                     </a>
                                 </div>
                             </div>
-                            <div id="pt_menu25" class="pt_menu nav-1">
+                            {% for i in nvCategorys %}
+                            <div id="{% cycle 'pt_menu25' 'pt_menu57' 'pt_menu20' 'pt_menu_link25'%}" class="{% cycle 'pt_menu nav-1' 'pt_menu nav-2 pt_menu_no_child' 'pt_menu nav-3' 'pt_menu' %}">
                                 <div class="parentMenu">
-                                    <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/category&amp;path=25">
-                                        <span>Men</span>
+                                    <a href="{% url 'store:category_view' i.id %}">
+                                        <span>{{i.name}}</span>
                                     </a>
                                 </div>
                             </div>
-                            <div id="pt_menu57" class="pt_menu nav-2 pt_menu_no_child">
-                                <div class="parentMenu">
-                                    <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/category&amp;path=57">
-                                        <span>Accessories</span>
-                                    </a>
-                                </div>
-                            </div>
-                            <div id="pt_menu20" class="pt_menu nav-3">
-                                <div class="parentMenu">
-                                    <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/category&amp;path=20">
-                                        <span>Women</span>
-                                    </a>
-                                </div>
-                            </div>
-                            <div id ="pt_menu_link25" class ="pt_menu">
-                                <div class="parentMenu" >
-                                    <a href="index.php?route=blog/blog">
-                                        <span>Blog </span>
-                                    </a>
-                                </div>
-                            </div>
+                            {% endfor %}
 		                </div>
 	                </div>
                 </div>
                 <div id="sticky-menu" data-sticky="1"></div>
-                <script type="text/javascript">
-                //<![CDATA[
-                    var body_class = $('body').attr('class'); 
-                    if(body_class.search('common-home') != -1) {
-                        $('#pt_menu_home').addClass('act');
-                    }	
-                var CUSTOMMENU_POPUP_EFFECT =0
-                var CUSTOMMENU_POPUP_TOP_OFFSET = 70
-                //]]>
-                </script>
 			</div>
 	    </div>
 	</div>

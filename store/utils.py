@@ -3,6 +3,7 @@ import uuid
 from .models import *
 from django.contrib.auth import login
 from django.contrib.auth.models import Group
+from django.contrib.auth import authenticate,login
 
 def productSerialize(id):
     product = Product.objects.get(id = id)
@@ -240,9 +241,7 @@ def productSerialize(id):
         }
     return product_with_image
 
-def cookieCart(request):
-    
-        
+def cookieCart(request):  
     try:
         cupon_d = json.loads(request.COOKIES.get('cupon'))
         cupon_code = cupon_d['cupon_code']
@@ -363,3 +362,35 @@ def guestOrder(request,data):
             total = total
             )
     return customer,order
+
+def checkout_login_handle(request):
+    login_username = request.POST.get('login_username')
+    password = request.POST.get('login_password')
+
+    try:
+        user_1 = User.objects.get(username = login_username)
+        username = user.username
+    except:
+        customer_1 = Customer.objects.get(phone = login_username)
+        user_1 =  customer_1.user
+        username = user_1.username
+
+    user = authenticate(request,username=username, password=password)
+    print(user)
+
+def category_with_products(id):
+    categoryProducts = []
+    category = Category.objects.get(id = id)
+    products = Product.objects.filter(category = category)
+    total_product = products.count()
+    for i in products:
+        product = productSerialize(i.id)
+        categoryProducts.append(product)
+
+    categoryWithProducts = {
+        'id':category.id,
+        'name':category.name,
+        'hasProducts':total_product,
+        'categoryProducts':categoryProducts
+    }
+    return categoryWithProducts

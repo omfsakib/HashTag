@@ -25,7 +25,9 @@ admin.site.register(Color)
 admin.site.register(Cupon)
 admin.site.register(Review)
 admin.site.register(ProductImages)
+admin.site.register(ShippingAddress)
 admin.site.register(IndivitualCategory)
+admin.site.register(LatestArrivals)
 
 admin.site.site_header = "HashTag Admin Panel"
 admin.site.site_title = "HashTag Admin Portal"

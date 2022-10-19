@@ -1,6 +1,7 @@
 from django import forms
 from django.db import models
 from django.contrib.auth.models import User
+from numpy import product
 
 # Create your models here.
 class Customer(models.Model):
@@ -100,9 +101,9 @@ class IndivitualCategory(models.Model):
 class Order(models.Model):
     STATUS = (
         ('Pending','Pending'),
+        ('Customer Confirmed','Customer Confirmed'),
         ('Out for delivery', 'Out for delivery'),
-        ('Delivered','Delivered'),
-        ('Take','Take')
+        ('Delivered','Delivered')
     )
     customer = models.ForeignKey(Customer, null=True, on_delete= models.CASCADE)
     complete = models.BooleanField(default=False)
@@ -148,23 +149,15 @@ class Delivery_charge(models.Model):
     discount = models.IntegerField(default=0,blank=True,null=True)
 
 class OrderItem(models.Model):
-    STATUS = (
-        ('Pending','Pending'),
-        ('Out for delivery', 'Out for delivery'),
-        ('Delivered','Delivered')
-    )
     customer = models.ForeignKey(Customer, null=True, on_delete= models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
     quantity = models.IntegerField(default=0,null=True,blank=True)
     rate = models.FloatField(default=0,blank=True,null=True)
     total = models.FloatField(default=0,blank=True,null=True)
-    advance = models.FloatField(default=0,blank=True,null=True)
-    due = models.FloatField(default=0,blank=True,null=True)
     color = models.CharField(blank=True,null=True, max_length=100)
     size = models.CharField(blank=True,null=True, max_length=100)
     date_added = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(default="Pending",max_length=200,blank=True, null=True,choices=STATUS)
 
     def __str__(self):
         return self.product.name
@@ -175,12 +168,11 @@ class OrderItem(models.Model):
         return total
 
 class ShippingAddress(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, blank=True, null=True)
+    order = models.ManyToManyField(Order)
     address = models.CharField(max_length=200, null=True)
     city = models.CharField(max_length=200, null=True)
     state = models.CharField(max_length=200, null=True)
-    zipcode = models.CharField(max_length=200, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -192,3 +184,11 @@ class Cupon(models.Model):
 
     def __str__(self):
         return self.cupon_code
+
+class LatestArrivals(models.Model):
+    user = models.ForeignKey(User, null = True,blank=True ,on_delete=models.CASCADE)
+    products_for =  models.CharField(max_length=200,blank=True, null=True)
+    products = models.ManyToManyField(Product)
+
+    def __str__(self):
+        return self.products_for

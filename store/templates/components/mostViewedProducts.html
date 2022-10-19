@@ -29,9 +29,12 @@
                                                 <div class="product-thumb transition">
                                                     <div class="image">
                                                         <a href="{% url 'store:product_view' i.id %}">
-                                                            <img class="img-r" src="{{i.image_1}}" alt="{{i.name}}" />
-                                                            <img src="{{i.image_2}}" alt="{{i.name}}" title="{{i.name}}" class="img-responsive" />
-                                                        </a>				  
+                                                            <img class="img-r" src="{{i.image_2}}" alt="{{i.name}}" />
+                                                            <img src="{{i.image_1}}" alt="{{i.name}}" title="{{i.name}}" class="img-responsive" />
+                                                        </a>
+                                                        {% if i.featured %}
+                                                        <div class="label-product label_sale">Sale</div>
+                                                        {% endif %}			  
                                                         <div class="action-links">
                                                             <button class="btn-cart update-cart" type="button" data-product={{i.id}} data-size="{{i.first_size}}" data-color="{{i.first_color}}" data-action="add" title="Add to Cart">
                                                                 <i class="ion-bag"></i>
@@ -45,21 +48,31 @@
                                                                 <i class="ion-android-options"></i>
                                                                 <span>Compare this Product</span>
                                                             </button>
-                                                            <button class="btn-quickview" type="button" data-toggle="tooltip" title="Quick View" onclick="ocquickview.ajaxView('http://mimosa4.demo.towerthemes.com/index.php?route=product/product&amp;product_id=28')">
-                                                                <i class="ion-android-open"></i>
-                                                                <span>Quick View</span>
-                                                            </button>
                                                         </div>
                                                     </div>
                                                     <div class="caption">
                                                         <p class="manufacture-product">
-                                                            <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/manufacturer/info&amp;manufacturer_id=5">Armani</a>
+                                                            <a href="{% url 'store:product_view' i.id %}">{{i.product_code}}</a>
                                                         </p>
                                                         <div class="ratings">
-                                                            <div class="rating-box"></div>
+                                                            <div class="rating-box">
+                                                                {% if i.rate <= 0 %}
+                                                                <div class="rating0">rating</div>
+                                                                {% elif i.rate <= 1 %}
+                                                                <div class="rating1">rating</div>
+                                                                {% elif i.rate <= 2 %}
+                                                                <div class="rating2">rating</div>
+                                                                {% elif i.rate <= 3 %}
+                                                                <div class="rating3">rating</div>
+                                                                {% elif i.rate <= 4 %}
+                                                                <div class="rating4">rating</div>
+                                                                {% elif i.rate <= 5 %}
+                                                                <div class="rating5">rating</div>
+                                                                {% endif %}
+                                                            </div>
                                                         </div>
                                                         <h4 class="product-name">
-                                                            <a href="http://mimosa4.demo.towerthemes.com/index.php?route=product/product&amp;product_id=28">{{ i.name }}</a>
+                                                            <a href="{% url 'store:product_view' i.id %}">{{ i.name }}</a>
                                                         </h4>                  
                                                         <p class="price">&#2547;{{i.price}}</p>
                                                     </div>
