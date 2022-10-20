@@ -1,0 +1,103 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        
+	    $('.breadcrumb').before($('.heading-title'));
+        $('#input-payment-city').hide()
+        $('#input-payment-city').keyup(function() {
+            $('#cityValue').val(this.value)
+        });
+        $('input[type=radio][name=city]').change(function() {
+            if (this.value == 'other') {
+                $('#input-payment-city').show(500)
+            }
+            else if(this.value == 'Dhaka') {
+                $('#input-payment-city').hide(500)
+            }
+        });
+    })
+
+
+</script>
+<style>
+    .breadcrumbs{
+        display: none;
+    }
+</style>
+<div class="container-box" style="display: flex;background: #f6f6f6;padding: 50px;align-items: center;justify-content: center;margin-bottom: 60px;">
+    <h2 class="heading-title">Login</h2>
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:login' %}">Login</a></li>
+    </ul>
+    <div class="account-login" style="
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+">
+        <div class="page-title">
+            <h1>Login or create an account</h1>
+        </div>
+        <div class="ajax-content">
+            <div class="ajax-container">
+                <div class="login-form-content">
+                    <h2>New Customer</h2>
+                    <p>By creating an account you will be able to shop faster, be up to date on an order's status, and keep track of the orders you have previously made.</p>
+                    <p>If you already have an account with us, please login at the <strong><a href="{% url 'store:login' %}">login form.</a> </strong></p>
+                    <div class="row">
+                        <form  method="POST">
+                            {% csrf_token %}
+                            <div class="col-sm-6">
+                                <legend>Your Personal Details</legend>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-firstname">Full Name</label>
+                                    <input type="text" name="reg_name" value="" placeholder="Full Name" id="input-payment-firstname" class="form-control" required>
+                                </div>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-email">E-Mail</label>
+                                    <input type="text" name="reg_email" value="" placeholder="E-Mail" id="input-payment-email" class="form-control">
+                                </div>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-telephone">Telephone</label>
+                                    <input type="text" name="reg_phone" value="" placeholder="Telephone" id="input-payment-telephone" class="form-control">
+                                </div>
+                                <legend>Your Password</legend>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-password">Password</label>
+                                    <input type="password" name="reg_password1" value="" placeholder="Password" id="input-payment-password" class="form-control">
+                                </div>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-confirm">Password Confirm</label>
+                                    <input type="password" name="reg_password2" value="" placeholder="Password Confirm" id="input-payment-confirm" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <legend>Your Address</legend>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-address-1">Address </label>
+                                    <input type="text" name="address" placeholder="Address ..." id="input-payment-address-1" class="form-control">
+                                </div>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-postcode">Area</label>
+                                    <input type="text" name="area" value="" placeholder="Area ...." id="input-payment-postcode" class="form-control">
+                                </div>
+                                <div class="form-group required">
+                                    <label class="control-label" for="input-payment-city">City</label><br>
+                                    <input type="radio" name="city"  value="Dhaka" style="margin-right:5px;">Dhaka</input> <br>
+                                    <input type="radio" name="city" id="cityValue" style="margin-right:5px;" value="other">Other</input>  <br>
+                                    <input type="text"  placeholder="Enter City ...." id="input-payment-city" class="form-control">
+
+                                </div>
+                                <input type="submit" value="SignUp"   class="btn btn-primary">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

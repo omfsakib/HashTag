@@ -14,6 +14,7 @@ app_name = 'store'
 urlpatterns = [
     path('login/',views.loginUser,name="login"),
     path('logout/',views.logoutUser,name="logout"),
+    path('signup/',views.signUpUser,name="sign_up"),
     path('',views.home,name="home"),
     path('product_id=<str:pk>/',views.productView,name="product_view"),
     path('category/category_id=<str:pk>/',views.categoryView,name="category_view"),

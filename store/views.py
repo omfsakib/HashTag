@@ -23,11 +23,22 @@ def logoutUser(request):
     return redirect('store:home')
 
 def loginUser(request):
+    #Navbar Section
+    navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
+    navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #CartItem Section
     cookieData = cookieCart(request)
     cartItems = cookieData['cartItems']
     cartTotal = cookieData['cartTotal']
     order = cookieData['order']
     items = cookieData['items']
+    total_items = len(items)
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+
+    #Login Section
     if request.method =='POST' and 'login_username' in request.POST:
         login_username = request.POST.get('login_username')
         password = request.POST.get('login_password')
@@ -54,7 +65,7 @@ def loginUser(request):
                 quantity = item['quantity']
                 rate = product.price
                 total = float(product.price) * float(quantity)
-                orderItem = OrderItem.objects.get_or_create(
+                orderItem, created  = OrderItem.objects.get_or_create(
                     product=product,
                     order = db_order,
                     customer=customer, 
@@ -66,18 +77,142 @@ def loginUser(request):
                     )
             login(request,user)
         return redirect('store:home')
-    context = {
-        'cartItems':cartItems,
-        'cartTotal':cartTotal
-    }
-    return render(request,'store/login.html',context)
+    if total_items > 0:
+        for item in items:
+            product = Product.objects.get(id = item['product']['id'])
+            item['sizes'] = product.size.all()
+            item['colors'] = product.color.all()
+            item['image'] = ProductImages.objects.filter(product = product)[:1]
+            price_total += product.price
+    
+        total = float(price_total) + float(delivery_charge)
+
+        context ={
+            'cartItems':cartItems,
+            'cartTotal':cartTotal,
+            'nvCategorys':navbarCategorys,
+            'order':order,
+            'items':items,
+            'item.image':item['image'],
+            'item.sizes':item['sizes'],
+            'item.colors':item['colors'],
+            'delivery_charge':delivery_charge,
+            'total':total,
+
+        }
+    else:
+        context ={
+            'cartItems':cartItems,
+            'cartTotal':cartTotal,
+            'nvCategorys':navbarCategorys,
+
+        }
+    return render(request,'accounts/login.html',context)
 
 def signUpUser(request):
+    #Navbar Section
+    navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
+    navbarCategorys = navbarCategoryObject.categorys.all()
 
-    context ={
+    #CartItem Section
+    cookieData = cookieCart(request)
+    cartItems = cookieData['cartItems']
+    cartTotal = cookieData['cartTotal']
+    order = cookieData['order']
+    items = cookieData['items']
+    total_items = len(items)
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
 
-    }
-    return render(request,'store/registration.html',context)
+    #SignUp Section
+    if request.method =='POST' and 'reg_name' in request.POST:
+        name =  request.POST.get('reg_name')
+        email =  request.POST.get('reg_email')
+        phone =  request.POST.get('reg_phone')
+        password1 =  request.POST.get('reg_password1')
+        password2 =  request.POST.get('reg_password2')
+        address =  request.POST.get('address')
+        area =  request.POST.get('area')
+        city =  request.POST.get('city')
+        if User.objects.filter(email=email).first():
+            messages.error(request, 'Email is taken.')
+            print("email is taken")
+            return redirect('store:sign_up')
+        elif Customer.objects.filter(phone = phone).first():
+            messages.error(request, 'Phone is used on another account.')
+            return redirect('store:sign_up')
+        elif password1 != password2:
+            messages.error(request, "Password didn't match!.")
+            return redirect('store:sign_up')
+        else:
+            user = User.objects.create(first_name = name, email=email,username=phone)
+            user.set_password(password1)
+            user.save()
+            customer = Customer.objects.create(
+                    user = user,
+                    phone = phone,
+            )
+            shipping =  ShippingAddress.objects.create(
+                customer = customer,
+                address = address,
+                state = area,
+                city = city
+            )
+            group = Group.objects.get(name = 'customer')
+            user.groups.add(group)
+            if user is not None:
+                db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
+                shipping.order.add(db_order)
+                for item in items:
+                    product = Product.objects.get(id=item['product']['id'])
+                    quantity = item['quantity']
+                    rate = product.price
+                    total = float(product.price) * float(quantity)
+                    orderItem, created  = OrderItem.objects.get_or_create(
+                        product=product,
+                        order = db_order,
+                        customer=customer, 
+                        quantity = item['quantity'],
+                        size = item['size'],
+                        color = item['color'],
+                        rate = rate,
+                        total = total
+                        )
+                login(request,user)
+        return redirect('store:home')
+    
+    if total_items > 0:
+        for item in items:
+            product = Product.objects.get(id = item['product']['id'])
+            item['sizes'] = product.size.all()
+            item['colors'] = product.color.all()
+            item['image'] = ProductImages.objects.filter(product = product)[:1]
+            price_total += product.price
+    
+        total = float(price_total) + float(delivery_charge)
+
+        context ={
+            'cartItems':cartItems,
+            'cartTotal':cartTotal,
+            'nvCategorys':navbarCategorys,
+            'order':order,
+            'items':items,
+            'item.image':item['image'],
+            'item.sizes':item['sizes'],
+            'item.colors':item['colors'],
+            'delivery_charge':delivery_charge,
+            'total':total,
+
+        }
+    else:
+        context ={
+            'cartItems':cartItems,
+            'cartTotal':cartTotal,
+            'nvCategorys':navbarCategorys,
+
+        }
+    return render(request,'accounts/registration.html',context)
 
 def home(request):
     #Navbar Section
@@ -218,14 +353,100 @@ def productView(request,pk):
         print(i.Z_img)
     reviews = Review.objects.filter(product=product)
     total_review = reviews.count()
-    context = {
-        'product':product,
-        'nvCategorys':navbarCategorys,
-        'images':images,
-        'big_img':big_img,
-        'reviews':reviews,
-        'total_review':total_review
-    }
+
+    #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'product':product,
+                'nvCategorys':navbarCategorys,
+                'images':images,
+                'big_img':big_img,
+                'reviews':reviews,
+                'total_review':total_review,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'product':product,
+                'nvCategorys':navbarCategorys,
+                'images':images,
+                'big_img':big_img,
+                'reviews':reviews,
+                'total_review':total_review,
+                'cartItems':cartItems,
+            }
+
+    else:
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        cartTotal = cookieData['cartTotal']
+        order = cookieData['order']
+        items = cookieData['items']
+        total_items = len(items)
+
+        if total_items > 0:
+
+            for item in items:
+                product = Product.objects.get(id = item['product']['id'])
+                item['sizes'] = product.size.all()
+                item['colors'] = product.color.all()
+                item['image'] = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'product':product,
+                'nvCategorys':navbarCategorys,
+                'images':images,
+                'big_img':big_img,
+                'reviews':reviews,
+                'total_review':total_review,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item['image'],
+                'item.sizes':item['sizes'],
+                'item.colors':item['colors'],
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'product':product,
+                'nvCategorys':navbarCategorys,
+                'images':images,
+                'big_img':big_img,
+                'reviews':reviews,
+                'total_review':total_review,
+                'cartItems':cartItems,
+            }
 
     return render(request,'store/productView.html',context)
 
@@ -544,7 +765,7 @@ def checkout(request):
                     quantity = item['quantity']
                     rate = product.price
                     total = float(product.price) * float(quantity)
-                    orderItem = OrderItem.objects.get_or_create(
+                    orderItem, created  = OrderItem.objects.get_or_create(
                         product=product,
                         order = db_order,
                         customer=customer, 
@@ -566,15 +787,14 @@ def checkout(request):
             area =  request.POST.get('area')
             city =  request.POST.get('city')
             if User.objects.filter(email=email).first():
-                messages.success(request, 'Email is taken.')
+                messages.error(request, 'Email is taken.')
                 print("email is taken")
                 return redirect('store:checkout')
             elif Customer.objects.filter(phone = phone).first():
-                messages.success(request, 'Phone is used on another account.')
+                messages.error(request, 'Phone is used on another account.')
                 return redirect('store:checkout')
             elif password1 != password2:
-                print("password didn't match!")
-                messages.success(request, "Password didn't match!.")
+                messages.error(request, "Password didn't match!.")
                 return redirect('store:checkout')
             else:
                 user = User.objects.create(first_name = name, email=email,username=phone)
@@ -592,7 +812,6 @@ def checkout(request):
                 )
                 group = Group.objects.get(name = 'customer')
                 user.groups.add(group)
-                print("looged in")
                 if user is not None:
                     db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
                     shipping.order.add(db_order)
@@ -601,7 +820,7 @@ def checkout(request):
                         quantity = item['quantity']
                         rate = product.price
                         total = float(product.price) * float(quantity)
-                        orderItem = OrderItem.objects.get_or_create(
+                        orderItem, created  = OrderItem.objects.get_or_create(
                             product=product,
                             order = db_order,
                             customer=customer, 
@@ -702,13 +921,96 @@ def categoryView(request,pk):
     for k in products:
         outputProduct.append(productSerialize(k.id))
     
-    context = {
-        'nvCategorys':navbarCategorys,
-        'selectedCategory':selectedCategory,
-        'categoryWithDetailedProduct':categoryWithDetailedProduct,
-        'necessaryItems':necessaryItems,
-        'products':outputProduct,
-    }
+
+     #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'nvCategorys':navbarCategorys,
+                'selectedCategory':selectedCategory,
+                'categoryWithDetailedProduct':categoryWithDetailedProduct,
+                'necessaryItems':necessaryItems,
+                'products':outputProduct,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'nvCategorys':navbarCategorys,
+                'selectedCategory':selectedCategory,
+                'categoryWithDetailedProduct':categoryWithDetailedProduct,
+                'necessaryItems':necessaryItems,
+                'products':outputProduct,
+                'cartItems':cartItems,
+            }
+
+    else:
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        cartTotal = cookieData['cartTotal']
+        order = cookieData['order']
+        items = cookieData['items']
+        total_items = len(items)
+
+        if total_items > 0:
+
+            for item in items:
+                product = Product.objects.get(id = item['product']['id'])
+                item['sizes'] = product.size.all()
+                item['colors'] = product.color.all()
+                item['image'] = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'nvCategorys':navbarCategorys,
+                'selectedCategory':selectedCategory,
+                'categoryWithDetailedProduct':categoryWithDetailedProduct,
+                'necessaryItems':necessaryItems,
+                'products':outputProduct,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item['image'],
+                'item.sizes':item['sizes'],
+                'item.colors':item['colors'],
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'nvCategorys':navbarCategorys,
+                'selectedCategory':selectedCategory,
+                'categoryWithDetailedProduct':categoryWithDetailedProduct,
+                'necessaryItems':necessaryItems,
+                'products':outputProduct,
+                'cartItems':cartItems,
+            }
     return render(request,'store/categoryView.html',context)
 
 def searchProduct(request,*arg,**kwargs):

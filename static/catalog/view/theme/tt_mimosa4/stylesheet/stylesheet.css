@@ -2057,10 +2057,16 @@ label[for='input-quantity']{
 		font-size: 30px;
 		margin: 0 0 15px 0;
 	}
-	.zoomContainer,
-	.b-modal,
-	.newletter-popup{
-		display: none !important;
+	.zoomContainer, .b-modal, .newletter-popup {
+		display: block !important;
+		left: -300px !important;
+		top: 87px !important;
+		/* width: 1px !important; */
+		/* height: 74px !important; */
+	}
+	.zoomWindow {
+		width: 265px !important;
+		height: 259px !important;
 	}
 	#product-product, .layer-category{
 		margin-top: 0;
