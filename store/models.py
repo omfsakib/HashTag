@@ -90,6 +90,13 @@ class Review(models.Model):
     def __str__(self):
         return str(self.id)
 
+class ReviewImages(models.Model):
+    review =  models.ForeignKey(Review, null=True, on_delete= models.CASCADE)
+    img = models.ImageField(default="product-pic.jpg",null = True,blank = True)
+
+    def __str__(self):
+        return str(self.img)
+
 class IndivitualCategory(models.Model):
     user = models.ForeignKey(User, null = True,blank=True ,on_delete=models.CASCADE)
     category_for =  models.CharField(max_length=200,blank=True, null=True)

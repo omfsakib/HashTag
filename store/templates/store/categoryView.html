@@ -1,7 +1,6 @@
 {% extends 'main.html' %}
 
-{% block content %}
-
+{% block head %}
 <script type="text/javascript">
     document.body.classList.add(
         'product-category',
@@ -9,6 +8,8 @@
         'group1'
         );
 </script>
+{% endblock %}
+{% block content %}
 
 <form method="POST">
     {% csrf_token %}

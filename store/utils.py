@@ -272,12 +272,13 @@ def cookieCart(request):
     
     for i in cart :
         try:
-            cartItems += cart[i]["quantity"]
+            cartItems += int(cart[i]["quantity"])
             
             product = Product.objects.get(id = i)
-            total = (product.price * cart[i]['quantity'])
+            total = float((float(product.price) * int(cart[i]['quantity'])))
             order['get_cart_total'] += total
-            order['get_cart_items'] += cart[i]['quantity']
+            order['get_cart_items'] += int(cart[i]['quantity'])
+            print(order['get_cart_items'])
 
 
             cartTotal = order['get_cart_total']
@@ -317,51 +318,6 @@ def cookieCart(request):
     
     return {"order":order,"items":items,"cartItems":cartItems,'cartTotal':cartTotal}
 
-def guestOrder(request,data):
-    name = data['form']['name']
-    phone = data['form']['phone']
-    
-    cookieData = cookieCart(request)
-    items = cookieData['items']
-    
-    customer, created = Customer.objects.get_or_create(
-        phone = phone,
-    )
-    if created:
-        username = phone
-        user = User.objects.create(username= username,first_name = name)
-        customer.user = user
-        customer.save()
-        auth_token=str(uuid.uuid4())
-        profile_obj = UserProfile.objects.create(user = user,auth_token=auth_token)
-        profile_obj.save()
-        group = Group.objects.get(name = 'customer')
-        user.groups.add(group)
-        login(request,user)
-    else:
-        user = customer.user
-        login(request,user)
-
-    for item in items:
-        product = Product.objects.get(id=item['product']['id'])
-        shopowner = product.shopowner
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        order.shop.add(shopowner)
-        quantity = item['quantity']
-        rate = product.price
-        total = float(product.price) * float(quantity)
-        orderItem = OrderItem.objects.get_or_create(
-            product=product,
-            order = order,
-            customer=customer, 
-            shop=shopowner,
-            quantity = item['quantity'],
-            size = item['size'],
-            color = item['color'],
-            rate = rate,
-            total = total
-            )
-    return customer,order
 
 def checkout_login_handle(request):
     login_username = request.POST.get('login_username')
@@ -394,3 +350,22 @@ def category_with_products(id):
         'categoryProducts':categoryProducts
     }
     return categoryWithProducts
+
+def reviews_with_images(id):
+    images = []
+    tmp_review = Review.objects.get(id = id)
+    tmp_date = tmp_review.created_at.date()
+    tmp_images = ReviewImages.objects.filter(review = tmp_review)
+    for i in tmp_images:
+        images.append(i.img.url)
+    
+    review = {
+        'id' : tmp_review.id,
+        'user': tmp_review.user,
+        'product': tmp_review.product,
+        'comment': tmp_review.comment,
+        'rate': tmp_review.rate,
+        'created_at':tmp_date,
+        'images': images,
+    }
+    return review

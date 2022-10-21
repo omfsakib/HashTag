@@ -1,4 +1,4 @@
-
+from django.urls import reverse
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -68,13 +68,14 @@ def loginUser(request):
                 orderItem, created  = OrderItem.objects.get_or_create(
                     product=product,
                     order = db_order,
-                    customer=customer, 
-                    quantity = item['quantity'],
-                    size = item['size'],
-                    color = item['color'],
-                    rate = rate,
-                    total = total
-                    )
+                    customer=customer
+                )
+                orderItem.quantity=item['quantity']
+                orderItem.size = item['size']
+                orderItem.color = item['color']
+                orderItem.rate = rate,
+                orderItem.total = total
+                orderItem.save()
             login(request,user)
         return redirect('store:home')
     if total_items > 0:
@@ -137,7 +138,6 @@ def signUpUser(request):
         city =  request.POST.get('city')
         if User.objects.filter(email=email).first():
             messages.error(request, 'Email is taken.')
-            print("email is taken")
             return redirect('store:sign_up')
         elif Customer.objects.filter(phone = phone).first():
             messages.error(request, 'Phone is used on another account.')
@@ -170,15 +170,16 @@ def signUpUser(request):
                     rate = product.price
                     total = float(product.price) * float(quantity)
                     orderItem, created  = OrderItem.objects.get_or_create(
-                        product=product,
+                       product=product,
                         order = db_order,
                         customer=customer, 
-                        quantity = item['quantity'],
-                        size = item['size'],
-                        color = item['color'],
-                        rate = rate,
-                        total = total
                         )
+                    orderItem.quantity=item['quantity']
+                    orderItem.size = item['size']
+                    orderItem.color = item['color']
+                    orderItem.rate = rate,
+                    orderItem.total = total
+                    orderItem.save()
                 login(request,user)
         return redirect('store:home')
     
@@ -349,10 +350,37 @@ def productView(request,pk):
     product = Product.objects.get(id = pk)
     images = ProductImages.objects.filter(product=product)
     big_img = ProductImages.objects.filter(product=product)[:1]
-    for i in big_img:
-        print(i.Z_img)
-    reviews = Review.objects.filter(product=product)
-    total_review = reviews.count()
+
+    #Review Section
+    reviews = []
+    tmp_reviews = Review.objects.filter(product=product)
+    total_review = tmp_reviews.count()
+    review_count = 0
+    for i in tmp_reviews:
+        reviews.append(reviews_with_images(i.id))
+        review_count += i.rate
+        product.rate = float(review_count/total_review)
+        product.save()
+
+    if request.method == 'POST':
+        comment = request.POST.get('review_comment')
+        rate = request.POST.get('review_rate')
+        review_images = request.FILES.getlist('review_images')
+        new_review = Review.objects.create(user = request.user.customer, product = product)
+        new_review.comment = comment
+        new_review.rate = rate
+        new_review.save()
+        for i in review_images:
+            new_image = ReviewImages.objects.create(review = new_review,img = i)
+        return redirect(reverse('store:product_view', kwargs={'pk':pk}))
+
+    #Releted Product Section
+    categorys = product.category.all()
+    reletedProducts = []
+    for i in categorys:
+        category_product = Product.objects.filter(category=i).order_by('-rate')
+        for j in category_product:
+            reletedProducts.append(productSerialize(j.id))
 
     #Cart Item Section
     delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
@@ -390,6 +418,7 @@ def productView(request,pk):
                 'item.colors':item.colors,
                 'delivery_charge':delivery_charge,
                 'total':total,
+                'rltdProducts':reletedProducts,
             }
         else:
             context = {
@@ -400,6 +429,7 @@ def productView(request,pk):
                 'reviews':reviews,
                 'total_review':total_review,
                 'cartItems':cartItems,
+                'rltdProducts':reletedProducts,
             }
 
     else:
@@ -436,6 +466,7 @@ def productView(request,pk):
                 'item.colors':item['colors'],
                 'delivery_charge':delivery_charge,
                 'total':total,
+                'rltdProducts':reletedProducts,
             }
         else:
             context = {
@@ -446,6 +477,7 @@ def productView(request,pk):
                 'reviews':reviews,
                 'total_review':total_review,
                 'cartItems':cartItems,
+                'rltdProducts':reletedProducts,
             }
 
     return render(request,'store/productView.html',context)
@@ -456,7 +488,7 @@ def updateItem(request):
     action = data['action']
     color = data['color']
     size = data['size']
-
+    quantity = data['quantity']
 
     customer = request.user.customer
     product = Product.objects.get(id=productId)
@@ -467,10 +499,13 @@ def updateItem(request):
        orderItem.color = color
        orderItem.size = size
 
+    if quantity == 'undefined':
+        quantity = 1
+
     orderItem.rate = product.price
 
     if action == 'add':
-        orderItem.quantity = (orderItem.quantity + 1)
+        orderItem.quantity = (orderItem.quantity + int(quantity))
 
     elif action == 'remove':
         orderItem.quantity = (orderItem.quantity - 1)
@@ -494,36 +529,6 @@ def updateItem(request):
 
     return JsonResponse('Item was added', safe=False)
 
-
-def processOrder(request):
-    transaction_id = datetime.datetime.now().timestamp()
-    data = json.loads(request.body)
-
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        email = request.user.email
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        
-
-    else:
-        customer,order = guestOrder(request,data)
-                
-    total = float(data['form']['total'])
-    order.transaction_id = transaction_id
-
-    if total == float(order.get_cart_total):
-        order.complete = True
-        print(order.complete)
-        delivery_charge = Delivery_charge.objects.all()
-        for i in delivery_charge:
-            chrge = i.fee
-            discount = i.discount
-        
-        order.delivery_fee = chrge
-        order.total = total + chrge
-        order.save()
-
-    return JsonResponse('Order completed!', safe=False)
 
 def cart(request):
     #Navbar Section
@@ -672,6 +677,10 @@ def checkout(request):
         customer = request.user.customer
         shipping = ShippingAddress.objects.get(customer = customer)
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        if Order.objects.filter(customer=customer,complete=True,cupon_code = order.cupon_code).exists():
+            order.cupon_code += '- expired'
+            order.cupon_amount = 0
+            order.save()
         cartItems = order.get_cart_items
         cartTotal = order.get_cart_total
         items = order.orderitem_set.all()
@@ -769,12 +778,13 @@ def checkout(request):
                         product=product,
                         order = db_order,
                         customer=customer, 
-                        quantity = item['quantity'],
-                        size = item['size'],
-                        color = item['color'],
-                        rate = rate,
-                        total = total
                         )
+                    orderItem.quantity=item['quantity']
+                    orderItem.size = item['size']
+                    orderItem.color = item['color']
+                    orderItem.rate = rate
+                    orderItem.total = total
+                    orderItem.save()
                 login(request,user)
 
         if request.method =='POST' and 'reg_name' in request.POST:
@@ -788,7 +798,6 @@ def checkout(request):
             city =  request.POST.get('city')
             if User.objects.filter(email=email).first():
                 messages.error(request, 'Email is taken.')
-                print("email is taken")
                 return redirect('store:checkout')
             elif Customer.objects.filter(phone = phone).first():
                 messages.error(request, 'Phone is used on another account.')
@@ -823,13 +832,14 @@ def checkout(request):
                         orderItem, created  = OrderItem.objects.get_or_create(
                             product=product,
                             order = db_order,
-                            customer=customer, 
-                            quantity = item['quantity'],
-                            size = item['size'],
-                            color = item['color'],
-                            rate = rate,
-                            total = total
-                            )
+                            customer=customer
+                        )
+                        orderItem.quantity=item['quantity']
+                        orderItem.size = item['size']
+                        orderItem.color = item['color']
+                        orderItem.rate = rate,
+                        orderItem.total = total
+                        orderItem.save()
                     login(request,user)
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order['cupon_amount']))
         nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order['cupon_amount']))
@@ -1078,12 +1088,95 @@ def searchProduct(request,*arg,**kwargs):
 
     categorys = Category.objects.all()
 
-    context ={
-        'nvCategorys':navbarCategorys,
-        'products':outputProduct,
-        'searchText':query,
-        'categorys':categorys,
-        'necessaryItems':necessaryItems,
+    #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'nvCategorys':navbarCategorys,
+                'products':outputProduct,
+                'searchText':query,
+                'categorys':categorys,
+                'necessaryItems':necessaryItems,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'nvCategorys':navbarCategorys,
+                'products':outputProduct,
+                'searchText':query,
+                'categorys':categorys,
+                'necessaryItems':necessaryItems,
+                'cartItems':cartItems,
+            }
 
-    }
+    else:
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        cartTotal = cookieData['cartTotal']
+        order = cookieData['order']
+        items = cookieData['items']
+        total_items = len(items)
+
+        if total_items > 0:
+
+            for item in items:
+                product = Product.objects.get(id = item['product']['id'])
+                item['sizes'] = product.size.all()
+                item['colors'] = product.color.all()
+                item['image'] = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                
+                'nvCategorys':navbarCategorys,
+                'products':outputProduct,
+                'searchText':query,
+                'categorys':categorys,
+                'necessaryItems':necessaryItems,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item['image'],
+                'item.sizes':item['sizes'],
+                'item.colors':item['colors'],
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'nvCategorys':navbarCategorys,
+                'products':outputProduct,
+                'searchText':query,
+                'categorys':categorys,
+                'necessaryItems':necessaryItems,
+                'cartItems':cartItems,
+            }
+
     return render(request,'store/searchProduct.html',context)

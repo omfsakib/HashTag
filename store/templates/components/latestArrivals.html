@@ -24,7 +24,7 @@
                                                 <a href="{% url 'store:product_view' i.id %}">
                                                     <img class="img-r" src="{{i.image_2}}" alt="{{i.name}}" />
                                                     <img src="{{i.image_1}}" alt="{{i.name}}" title="{{i.name}}" class="img-responsive" />
-                                                </a>				  
+                                                </a>			  
                                                 <div class="label-product label_new">New</div>
                                                     
                                                 <div class="action-links">
@@ -51,9 +51,24 @@
                                                 <p class="manufacture-product">
                                                     <a href="{% url 'store:product_view' i.id %}">{{i.product_code}}</a>
                                                 </p>
+                                                
                                                 <div class="ratings">
-                                                    <div class="rating-box"></div>
-                                                </div>
+                                                    <div class="rating-box">
+                                                        {% if i.rate <= 0 %}
+                                                        <div class="rating0">rating</div>
+                                                        {% elif i.rate <= 1 %}
+                                                        <div class="rating1">rating</div>
+                                                        {% elif i.rate <= 2 %}
+                                                        <div class="rating2">rating</div>
+                                                        {% elif i.rate <= 3 %}
+                                                        <div class="rating3">rating</div>
+                                                        {% elif i.rate <= 4 %}
+                                                        <div class="rating4">rating</div>
+                                                        {% elif i.rate <= 5 %}
+                                                        <div class="rating5">rating</div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div> 
                                                 <h4 class="product-name">
                                                     <a href="{% url 'store:product_view' i.id %}">{{ i.name }}</a>
                                                 </h4>                  
