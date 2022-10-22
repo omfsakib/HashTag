@@ -338,7 +338,7 @@ input[type="range"]::-moz-range-thumb{
                                 <a href="{% url 'store:product_view' i.id %}">{{ i.name }}</a>
                             </h4>                  
                             <p class="price">&#2547;{{i.price}}</p>
-                            <p class="product-des">{{i.description}}</p>
+                            <p class="product-des">{{i.description|safe}}</p>
                         </div>
                     </div>
                 </div>

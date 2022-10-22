@@ -1,3 +1,4 @@
+from email import message
 from django.urls import reverse
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
@@ -77,6 +78,7 @@ def loginUser(request):
                 orderItem.total = total
                 orderItem.save()
             login(request,user)
+            messages.success(request,'Login Successfull!')
         return redirect('store:home')
     if total_items > 0:
         for item in items:
@@ -181,6 +183,7 @@ def signUpUser(request):
                     orderItem.total = total
                     orderItem.save()
                 login(request,user)
+            messages.success(request,'Login Successfull!')
         return redirect('store:home')
     
     if total_items > 0:
@@ -220,9 +223,36 @@ def home(request):
     navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
     navbarCategorys = navbarCategoryObject.categorys.all()
 
+    #Member Discount
+    if request.method == 'POST' and 'subscribe_email' in request.POST:
+        subscribe_email = request.POST.get('subscribe_email')
+        if Subscription.objects.filter(email= subscribe_email).exists():
+            messages.error(request,'This email already subscribed!')
+            return redirect('store:home')
+        else:
+            Subscription.objects.create(email = subscribe_email)
+            messages.success(request,'Subscription successfull!')
+            return redirect('store:home')
+
+
 
     total_products = Product.objects.all().count()
     if total_products > 0:
+
+        #Home Banner Section
+        homeBannerCategoryWithImage = HomeBannerCategory.objects.all()[:3]
+
+        #Collection Category Section
+        collectionCategoryWithImage = CollectionCategory.objects.all()[:3]
+
+        #ShopNow Category Section
+        shopNowCategoryWithImage = ShopNowCategorys.objects.all()[:2]
+
+        #Blog Section
+        blogs = []
+        tmp_blogs = Blog.objects.all().order_by('-date_added')
+        for i in tmp_blogs:
+            blogs.append(blogs_with_detailed_date(i.id))
 
         # Most Viewed Section
         mostViewedCategoryObject = IndivitualCategory.objects.get(category_for = 'mvcategory')
@@ -272,6 +302,10 @@ def home(request):
             
                 total = float(price_total) + float(delivery_charge)
                 context = {
+                    'blogs':blogs,
+                    'sncimage':shopNowCategoryWithImage,
+                    'ccimage':collectionCategoryWithImage,
+                    'hbcimage':homeBannerCategoryWithImage,
                     'mvproducts':mostViewedfilterdProductsWithCategorys,
                     'ltproducts':latestArrivalsProducts,
                     'nvCategorys':navbarCategorys,
@@ -288,6 +322,10 @@ def home(request):
                 }
             else:
                 context = {
+                    'blogs':blogs,
+                    'sncimage':shopNowCategoryWithImage,
+                    'ccimage':collectionCategoryWithImage,
+                    'hbcimage':homeBannerCategoryWithImage,
                     'mvproducts':mostViewedfilterdProductsWithCategorys,
                     'ltproducts':latestArrivalsProducts,
                     'nvCategorys':navbarCategorys,
@@ -314,6 +352,10 @@ def home(request):
             
                 total = float(price_total) + float(delivery_charge)
                 context = {
+                    'blogs':blogs,
+                    'sncimage':shopNowCategoryWithImage,
+                    'ccimage':collectionCategoryWithImage,
+                    'hbcimage':homeBannerCategoryWithImage,
                     'mvproducts':mostViewedfilterdProductsWithCategorys,
                     'ltproducts':latestArrivalsProducts,
                     'mvCategorys':mostViewedCategorys,
@@ -330,6 +372,10 @@ def home(request):
                 }
             else:
                 context = {
+                    'blogs':blogs,
+                    'sncimage':shopNowCategoryWithImage,
+                    'ccimage':collectionCategoryWithImage,
+                    'hbcimage':homeBannerCategoryWithImage,
                     'mvproducts':mostViewedfilterdProductsWithCategorys,
                     'ltproducts':latestArrivalsProducts,
                     'nvCategorys':navbarCategorys,
@@ -534,6 +580,17 @@ def cart(request):
     #Navbar Section
     navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
     navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #Member Discount
+    if request.method == 'POST' and 'subscribe_email' in request.POST:
+        subscribe_email = request.POST.get('subscribe_email')
+        if Subscription.objects.filter(email= subscribe_email).exists():
+            messages.error(request,'This email already subscribed!')
+            return redirect('store:cart')
+        else:
+            Subscription.objects.create(email = subscribe_email)
+            messages.success(request,'Subscription successfull!')
+            return redirect('store:cart')
     
     delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
     delivery_charge = delivery_charge_object.fee
@@ -664,6 +721,9 @@ def checkout(request):
     shipping = None
     delivery_charge = 60
     
+    member = False
+    percentageAmount = 0
+    
 
     if shipping != None:
         if shipping.city == 'Dhaka':
@@ -674,6 +734,7 @@ def checkout(request):
 
         
     if request.user.is_authenticated:
+        
         customer = request.user.customer
         shipping = ShippingAddress.objects.get(customer = customer)
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
@@ -683,9 +744,13 @@ def checkout(request):
             order.save()
         cartItems = order.get_cart_items
         cartTotal = order.get_cart_total
+        if Subscription.objects.filter(email = request.user.email).exists():
+            member = True
+            if cartTotal >= 2000 :
+                percentageAmount = float(cartTotal) * 0.05
         items = order.orderitem_set.all()
-        bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount))
-        nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order.cupon_amount))
+        bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount)) 
+        nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order.cupon_amount) - float(percentageAmount)) 
         if request.method == 'POST' and 'trxid' in request.POST: 
             method = request.POST.get('method')
             trxid = request.POST.get('trxid')
@@ -695,14 +760,16 @@ def checkout(request):
             elif method == 'nagad':
                 order.total = float(nagad_total) + float(delivery_charge)
             if method == 'cod':
-                order.total = float(cartTotal) - float(order.cupon_amount) + float(delivery_charge)
+                order.total = float(cartTotal) - float(order.cupon_amount) + float(delivery_charge) - float(percentageAmount)
                 trxid = 'Cash on delivery'
                 amount = 0
+
 
             order.transaction_id = trxid
             order.advance = amount
             order.due = float(order.total) - float(order.advance)
             order.save()
+            return redirect('store:checkout')
         
         if request.method == 'POST' and 'order_confirm' in request.POST: 
             order.status = 'Customer Confirmed'
@@ -716,8 +783,10 @@ def checkout(request):
                 product = Product.objects.get(id = item.product.id)
                 item.image = ProductImages.objects.filter(product = product)[:1]
         
-        
+            
             context = {
+                'member':member,
+                'percentageAmount':percentageAmount,
                 'items':items,
                 'order':order,
                 'nvCategorys':navbarCategorys,
@@ -731,6 +800,8 @@ def checkout(request):
             }
         else:
             context = {
+                'percentageAmount':percentageAmount,
+                'member':member,
                 'items':items,
                 'order':order,
                 'cartItems':cartItems,
@@ -786,6 +857,8 @@ def checkout(request):
                     orderItem.total = total
                     orderItem.save()
                 login(request,user)
+                
+            messages.success(request,'Login Successfull!')
 
         if request.method =='POST' and 'reg_name' in request.POST:
             name =  request.POST.get('reg_name')
@@ -837,10 +910,12 @@ def checkout(request):
                         orderItem.quantity=item['quantity']
                         orderItem.size = item['size']
                         orderItem.color = item['color']
-                        orderItem.rate = rate,
+                        orderItem.rate = rate
                         orderItem.total = total
                         orderItem.save()
                     login(request,user)
+                    
+            messages.success(request,'SignuP Successfull!')
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order['cupon_amount']))
         nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order['cupon_amount']))
         
@@ -852,6 +927,8 @@ def checkout(request):
         
 
             context = {
+                'percentageAmount':percentageAmount,
+                'member':member,
                 'items':items,
                 'order':order,
                 'cartItems':cartItems,
@@ -865,6 +942,8 @@ def checkout(request):
             }
         else:
             context = {
+                'percentageAmount':percentageAmount,
+                'member':member,
                 'items':items,
                 'order':order,
                 'cartItems':cartItems,
@@ -1180,3 +1259,181 @@ def searchProduct(request,*arg,**kwargs):
             }
 
     return render(request,'store/searchProduct.html',context)
+
+def blog(request,pk):
+    blog = blogs_with_detailed_date(pk)
+
+    #Navbar Section
+    navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
+    navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'blog':blog,
+                'nvCategorys':navbarCategorys,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'blog':blog,
+                'nvCategorys':navbarCategorys,
+                'cartItems':cartItems,
+            }
+
+    else:
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        cartTotal = cookieData['cartTotal']
+        order = cookieData['order']
+        items = cookieData['items']
+        total_items = len(items)
+
+        if total_items > 0:
+
+            for item in items:
+                product = Product.objects.get(id = item['product']['id'])
+                item['sizes'] = product.size.all()
+                item['colors'] = product.color.all()
+                item['image'] = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                
+                'blog':blog,
+                'nvCategorys':navbarCategorys,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item['image'],
+                'item.sizes':item['sizes'],
+                'item.colors':item['colors'],
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'blog':blog,
+                'nvCategorys':navbarCategorys,
+                'cartItems':cartItems,
+            }
+    return render(request,'store/blog.html',context)
+
+def blogs(request):
+    #Blogs Section
+    blogs = []
+    tmp_blogs = Blog.objects.all().order_by('-date_added')
+    for i in tmp_blogs:
+        blogs.append(blogs_with_detailed_date(i.id))
+
+    #Navbar Section
+    navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
+    navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'blogs':blogs,
+                'nvCategorys':navbarCategorys,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'blogs':blogs,
+                'nvCategorys':navbarCategorys,
+                'cartItems':cartItems,
+            }
+
+    else:
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        cartTotal = cookieData['cartTotal']
+        order = cookieData['order']
+        items = cookieData['items']
+        total_items = len(items)
+
+        if total_items > 0:
+
+            for item in items:
+                product = Product.objects.get(id = item['product']['id'])
+                item['sizes'] = product.size.all()
+                item['colors'] = product.color.all()
+                item['image'] = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                
+                'blogs':blogs,
+                'nvCategorys':navbarCategorys,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item['image'],
+                'item.sizes':item['sizes'],
+                'item.colors':item['colors'],
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'blogs':blogs,
+                'nvCategorys':navbarCategorys,
+                'cartItems':cartItems,
+            }
+    return render(request,'store/blogs.html',context)

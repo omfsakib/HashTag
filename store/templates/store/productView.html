@@ -410,7 +410,7 @@
         <div class="tab-content">
             <div class="tab-pane active" id="tab-description">
                 <div>
-                    <p>{{product.description|linebreaks}}</p>
+                    <p>{{product.description|safe|linebreaks}}</p>
                 </div>
             </div>
             <div class="tab-pane" id="tab-review">

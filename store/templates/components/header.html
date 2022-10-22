@@ -291,6 +291,9 @@
                                             <a href="{% url 'store:category_view' i.id %}">{{i.name}}</a>
                                         </li>
                                         {% endfor %}
+                                        {% if blogs %}
+                                        <li><a href="{% url 'store:blogs'%}">Blogs</a></li>
+                                        {% endif %}
                                     </ul> 
 				
 			                    </div>
@@ -315,6 +318,13 @@
                                 </div>
                             </div>
                             {% endfor %}
+                            <div id="pt_menu_link25" class="pt_menu">
+                                <div class="parentMenu">
+                                    <a href="{% url 'store:blogs'%}">
+                                        <span>Blogs </span>
+                                    </a>
+                                </div>
+                            </div>
 		                </div>
 	                </div>
                 </div>

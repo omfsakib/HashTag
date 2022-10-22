@@ -1,91 +1,45 @@
+<style>
+    .articles-intro {
+    -webkit-line-clamp: 4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 <div id="blog_home" class="menu-recent owl-style3">
     <div>
-    <div class="blog-title module-title">
-    <h2>From Our Blog</h2>
-    <p class="module-description">Mirum est notare quam littera gothica, quam nunc putamus parum claram anteposuerit litterarum formas.</p>
+        <div class="blog-title module-title">
+            <h2>From Our Blog</h2>
+            <p class="module-description">Mirum est notare quam littera gothica, quam nunc putamus parum claram anteposuerit litterarum formas.</p>
+        </div>
+        <div class="articles-container owl-carousel owl-theme">
+            {% for blog in blogs %}
+            <div class="row_items">
+                <div class="articles-inner item-inner">
+                    <div class="articles-image">
+                        <img src="{{blog.img}}" alt="{{blog.name}}"/>
+                        <div class="articles-date">
+                            {{blog.month}}
+                            <span>{{blog.day}}</span>
+                        </div>
+                    </div>
+                    <div class="aritcles-content">
+                        <a class="articles-name" href="{% url 'store:blog_view' blog.id %}">{{blog.name}}</a>
+                        <span>{{blog.place}}</span>
+                        <div class="articles-intro">
+                            {{blog.description|safe}}
+                        </div>
+                        <div class="readmore">
+                            <a href="{% url 'store:blog_view' blog.id %}">Read more ...</a>
+                        </div>
+                    </div>												
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-         
-            <div class="articles-container owl-carousel owl-theme">
-                                    <div class="row_items">
-                                            <div class="articles-inner item-inner">
-                <div class="articles-image">
-                    <img src="http://mimosa4.demo.towerthemes.com/image/cache/catalog/blog/blog1-370x235.jpg" alt="Aypi non habent claritatem  insitam."/>
-                    <div class="articles-date">
-                        Aug
-                        <span>09</span>
-                    </div>
-                </div>
-                <div class="aritcles-content">
-                    <a class="articles-name" href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=1">Aypi non habent claritatem  insitam.</a>
-                                                    
-                        <span>Plazathemes</span>
-                                                
-                    <div class="articles-intro">Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam.Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam.</div>
-                    <div class="readmore"><a href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=1">Read more ...</a></div>
-                </div>												
-            </div>
-                        </div>
-                                                    <div class="row_items">
-                                            <div class="articles-inner item-inner">
-                <div class="articles-image">
-                    <img src="http://mimosa4.demo.towerthemes.com/image/cache/catalog/blog/blog2-370x235.jpg" alt="Bypi non habent claritatem  insitam."/>
-                    <div class="articles-date">
-                        Aug
-                        <span>09</span>
-                    </div>
-                </div>
-                <div class="aritcles-content">
-                    <a class="articles-name" href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=2">Bypi non habent claritatem  insitam.</a>
-                                                    
-                        <span>Plazathemes</span>
-                                                
-                    <div class="articles-intro">Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam.Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. <br></div>
-                    <div class="readmore"><a href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=2">Read more ...</a></div>
-                </div>												
-            </div>
-                        </div>
-                                                    <div class="row_items">
-                                            <div class="articles-inner item-inner">
-                <div class="articles-image">
-                    <img src="http://mimosa4.demo.towerthemes.com/image/cache/catalog/blog/blog3-370x235.jpg" alt="Cypi non habent claritatem  insitam."/>
-                    <div class="articles-date">
-                        Aug
-                        <span>09</span>
-                    </div>
-                </div>
-                <div class="aritcles-content">
-                    <a class="articles-name" href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=3">Cypi non habent claritatem  insitam.</a>
-                                                    
-                        <span>Plazathemes</span>
-                                                
-                    <div class="articles-intro">Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam.Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. <br></div>
-                    <div class="readmore"><a href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=3">Read more ...</a></div>
-                </div>												
-            </div>
-                        </div>
-                                                    <div class="row_items">
-                                            <div class="articles-inner item-inner">
-                <div class="articles-image">
-                    <img src="http://mimosa4.demo.towerthemes.com/image/cache/catalog/blog/blog1-370x235.jpg" alt="Dypi non habent claritatem  insitam."/>
-                    <div class="articles-date">
-                        Aug
-                        <span>09</span>
-                    </div>
-                </div>
-                <div class="aritcles-content">
-                    <a class="articles-name" href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=4">Dypi non habent claritatem  insitam.</a>
-                                                    
-                        <span>Plazathemes</span>
-                                                
-                    <div class="articles-intro">Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam.Aypi non habent claritatem  insitam. Aypi non habent claritatem  insitam. <br></div>
-                    <div class="readmore"><a href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/article&amp;article_id=4">Read more ...</a></div>
-                </div>												
-            </div>
-                        </div>
-                                </div>
-    </div>
-    
-    </div>
+</div>
     <script type="text/javascript">
     $(document).ready(function() {
     $(".articles-container").owlCarousel({

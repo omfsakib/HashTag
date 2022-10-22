@@ -1,44 +1,33 @@
-{% load static %}
 <div class="main-row full-width">
     <div class="container">
-    <div class="row">
-                        <div class="main-col col-sm-12 col-md-12">
-                                                            <div class="row sub-row">
-                                                    <div class="sub-col col-sm-12 col-md-12">
-                                                                                                                <div id="cmsblock-28"  class="cmsblock">
-    <div class='description'>										  										  <div class="banner-5">
-    <div class="col-sm-6">
-    <div class="col-img">
-    <a href="#">
-        <img src="{% static 'image/catalog/cmsblock/banner5-1.jpg' %}" alt="banner 5">
-    </a>
-    </div>
-    <div class="text-content">
-    <h3>New Arrivals</h3>
-    <h2>White Sneakers</h2>
-    <h2>for Men’s</h2>
-    <a href="#">Shop now</a>
-    </div>
-    </div>
-    <div class="col-sm-6">
-    <div class="col-img">
-    <a href="#">
-        <img src="{% static 'image/catalog/cmsblock/banner5-2.jpg' %}" alt="banner 5">
-    </a>
-    </div>
-    <div class="text-content">
-    <h3>Products amazing!</h3>
-    <h2>Short  T-Shirts</h2>
-    <h2>for Women’s</h2>
-    <a href="#">Shop now</a>
-    </div>
-    </div>
-    </div>																 									 									 									 									 									 									 									</div>
-    </div>
-    
-                                                                                                    </div>
-                                            </div>
-                                                    </div>
+        <div class="row">
+            <div class="main-col col-sm-12 col-md-12">
+                <div class="row sub-row">
+                    <div class="sub-col col-sm-12 col-md-12">
+                        <div id="cmsblock-28"  class="cmsblock">
+                            <div class='description'>
+                                <div class="banner-5">
+                                    {% for i in sncimage %}		
+                                    <div class="col-sm-6">
+                                        <div class="col-img">
+                                            <a href="{% url 'store:category_view' i.estimated_category.id %}">
+                                                <img src="{{i.img.url}}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="text-content">
+                                            <h3>{{i.title}}</h3>
+                                            <h2>{{i.sub_title}}</h2>
+                                            <h2>{{i.category_for}}</h2>
+                                            <a href="{% url 'store:category_view' i.estimated_category.id %}">Shop now</a>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>															 									 									 									 									 									 									 									</div>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
     </div>
-    </div>
+</div>

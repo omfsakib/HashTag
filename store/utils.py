@@ -1,5 +1,5 @@
 import json
-import uuid
+import calendar
 from .models import *
 from django.contrib.auth import login
 from django.contrib.auth.models import Group
@@ -369,3 +369,21 @@ def reviews_with_images(id):
         'images': images,
     }
     return review
+
+def blogs_with_detailed_date(id):
+    tmp_blog = Blog.objects.get(id = id)
+    tmp_blog_month = calendar.month_abbr[tmp_blog.date_added.month]
+    tmp_blog_day = tmp_blog.date_added.day
+    tmp_blog_date = tmp_blog.date_added.date()
+
+    blog = {
+        'id' : tmp_blog.id,
+        'name' : tmp_blog.name,
+        'place' : tmp_blog.place,
+        'description' : tmp_blog.description,
+        'img' : tmp_blog.img.url,
+        'date' : tmp_blog_date,
+        'day' : tmp_blog_day,
+        'month' : tmp_blog_month,
+    }
+    return blog

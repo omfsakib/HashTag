@@ -1,0 +1,63 @@
+{% extends 'main.html' %}
+
+{% block head %}
+<script>
+    document.body.classList.add(
+        'blog-blog',
+        'home4',
+        'group1'
+        );
+</script>
+{% endblock %}
+
+{% block content %}
+<style>
+    .col-sm-10 p{
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+</style>
+<div class="container">
+    <ul class="breadcrumb">
+        <li><a href="http://mimosa4.demo.towerthemes.com/index.php?route=common/home">Home</a></li>
+        <li><a href="http://mimosa4.demo.towerthemes.com/index.php?route=blog/blog">Blog</a></li>
+    </ul>
+    <div class="main">
+        <div class="row">
+            <div id="content" class="col-sm-12">
+                <div class="article-titles">
+                    <h1>Hashtag Blog</h1>
+                </div>
+                <div class="article-page">
+                    {% for blog in blogs %}
+                    <div class="article-layout article-list">
+                        <div class="article-item odd">
+                        <div class="article-item-inner">
+        
+                          <div class="article-intro">
+                            <div class="article-name"><h4><a href="{% url 'store:blog_view' blog.id %}">{{blog.name}}</a></h4></div>
+                            <p class="articledate">{{blog.date}} | {{blog.place}}</p>
+        
+                            <div class="intro-content">
+                            <div class="col-sm-2 text-center">
+                                <img src="{{blog.img}}" alt="{{blog.name}}">
+                            </div>
+                            <div class="col-sm-10">
+                                <p>{{blog.description|safe|linebreaks}}</p>
+                                <a class="btn readmore-page" href="{% url 'store:blog_view' blog.id %}">Read more ...</a>
+                            </div>
+                            </div>
+                          </div>                  
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

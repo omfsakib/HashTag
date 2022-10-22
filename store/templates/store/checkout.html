@@ -403,6 +403,12 @@
                                                 <td class="text-right">- {{order.cupon_amount|floatformat:2}}&#2547;</td>
                                             </tr>
                                             {% endif %}
+                                            {% if member %}
+                                            <tr>
+                                                <td class="text-right"><strong>Member<span>( 5% discount )</span> :</strong></td>
+                                                <td class="text-right">- {{percentageAmount|floatformat:2}}&#2547;</td>
+                                            </tr>
+                                            {% endif %}
                                             <tr>
                                                 <td class="text-right"><strong>Total<span>(With Charges)</span> :</strong></td>
                                                 <td class="text-right">{{order.total|floatformat:2}}&#2547;</td>

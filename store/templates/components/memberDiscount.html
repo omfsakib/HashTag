@@ -13,10 +13,14 @@
                 Subscribe to our newsletters now and stay up to date with new collections, the latest lookbooks and exclusive offers.
             </div>
             <div id="frm_subscribe-normal">
-                <form name="subscribe" id="subscribe">
+                <form name="subscribe" id="subscribe" method="POST">
+                    {% csrf_token %}
+                    {% if request.user.is_authenticated %}
+                    <input type="text" value="{{request.user.email}}" name="subscribe_email" id="subscribe_email" placeholder="Enter you email address here...">
+                    {% else %}
                     <input type="text" value="" name="subscribe_email" id="subscribe_email" placeholder="Enter you email address here...">
-                    <input type="hidden" value="" name="subscribe_name" id="subscribe_name" />
-                    <a class="btn" onclick="email_subscribe()"><span>Subscribe</span><i class="fa-envelope-o fa"></i></a>
+                    {% endif %}
+                    <a class="btn" onclick="document.getElementById('subscribe').submit();"><span>Subscribe</span><i class="fa-envelope-o fa"></i></a>
                        
                 </form>
             </div><!-- /#frm_subscribe -->

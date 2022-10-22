@@ -1,0 +1,38 @@
+{% extends 'main.html' %}
+{% block head %}
+<script>
+    document.body.classList.add(
+        'blog-article',
+        'home4',
+        'group1'
+        );
+</script>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:blogs' %}">Blog</a></li>
+        <li><a href="{% url 'store:blog_view' blog.id %}">{{blog.name}}</a></li>
+    </ul>
+    <div class="main">
+        <div class="row">
+            <div id="content" class="col-sm-12">
+                <div class="article-container">
+                    <div class="article-title">
+                        <h3>{{blog.name}}</h3>
+                    </div>
+                    <span class="article-date">{{blog.date}} | {{blog.place}}</span>
+                      <div class="article-description">
+                          <img src="{{blog.img}}" alt="{{blog.name}}">
+                          <p></p>
+                          <p>&nbsp;&nbsp;&nbsp;&nbsp;{{blog.description|safe|linebreaks}}<br></p>
+                          <p></p>
+                      </div>
+                      
+                  </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

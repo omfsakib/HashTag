@@ -117,8 +117,10 @@
                         });
                         </script>
     
-                         
+                         {% if blogs %}
                         {% include 'components/blog.html' %}    
+                        {% endif %}
+                        
                         {% include 'components/memberDiscount.html' %}                                                   
                         </div>
                     </div>
