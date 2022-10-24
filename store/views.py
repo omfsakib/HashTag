@@ -1,4 +1,4 @@
-from email import message
+from django.contrib.auth.hashers import check_password
 from django.urls import reverse
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
@@ -81,7 +81,10 @@ def loginUser(request):
                 orderItem.save()
             login(request,user)
             messages.success(request,'Login Successfull!')
-        return redirect('store:home')
+            return redirect('store:home')
+        else:
+            messages.error(request,'Login failed. Please try again!')
+            return redirect('store:login')
     if total_items > 0:
         for item in items:
             product = Product.objects.get(id = item['product']['id'])
@@ -224,9 +227,73 @@ def signUpUser(request):
     return render(request,'accounts/registration.html',context)
 
 def accountProfile(request,pk):
+    user = request.user
+    customer = request.user.customer
+    passwordChangeForm = PasswordChangeForm(user=request.user)
+
+    #Shipping Section
+    shipping = ShippingAddress.objects.get(customer = customer)
+
     #Navbar Section
     navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
     navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #Account Edit Section
+    if request.method == 'POST'and 'account_name' in request.POST:
+        account_name = request.POST.get('account_name')
+        account_email = request.POST.get('account_email')
+        account_telephone = request.POST.get('account_telephone')
+        account_image = request.FILES.get('account_image')
+        user.first_name = account_name
+        user.email = account_email
+        if User.objects.filter(username = account_telephone).exclude(username = user.username).exists():
+            messages.error(request,'Account exists with this phone number!')
+            return redirect(reverse('store:account_profile', kwargs={'pk':pk}))
+        elif Customer.objects.filter(phone = account_telephone).exclude(phone = customer.phone).exists():
+            messages.error(request,'Account exists with this phone number!')
+            return redirect(reverse('store:account_profile', kwargs={'pk':pk}))
+        else:
+            user.username = account_telephone
+
+        user.save()
+        if account_image is not None:
+            customer.phone = account_telephone
+            customer.profile_pic = account_image
+        else:
+            customer.phone = account_telephone
+        customer.save()
+        messages.success(request,'Information updated!')
+        return redirect(reverse('store:account_profile', kwargs={'pk':pk}))
+
+    if request.method == 'POST' and 'old_password' in request.POST:
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password1')
+        if check_password(old_password,user.password):
+            if new_password1 != new_password2:
+                messages.error(request,"Password didn't match. Please enter it again.")
+            elif new_password1 == old_password:
+                messages.error(request,"New password can't be as same as old password.")
+            else:
+                user.set_password(new_password1)
+                user.save()
+                login(request,user)
+                messages.success(request,'Password updated!')
+        else:
+            messages.error(request,'Your old password was entered incorrectly. Please enter it again.')
+
+        return redirect(reverse('store:account_profile', kwargs={'pk':pk}))
+    
+    if request.method == 'POST' and 'address' in request.POST:
+        address = request.POST.get('address')
+        state = request.POST.get('state')
+        city = request.POST.get('city')
+        shipping.address = address
+        shipping.state = state
+        shipping.city = city
+        shipping.save()
+        messages.success(request,'Billing details updated!')
+        return redirect(reverse('store:account_profile', kwargs={'pk':pk}))
 
     #Cart Item Section
     delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
@@ -249,7 +316,9 @@ def accountProfile(request,pk):
         
             total = float(price_total) + float(delivery_charge)
             context = {
+                'passwordChangeForm':passwordChangeForm,
                 'nvCategorys':navbarCategorys,
+                'shipping':shipping,
                 'items':items,
                 'cartItems':cartItems,
                 'cartTotal':cartTotal,
@@ -262,7 +331,9 @@ def accountProfile(request,pk):
             }
         else:
             context = {
+                'passwordChangeForm':passwordChangeForm,
                 'nvCategorys':navbarCategorys,
+                'shipping':shipping,
                 'cartItems':cartItems,
             }
     return render(request,'accounts/accountProfile.html',context)
@@ -826,6 +897,7 @@ def checkout(request):
             order.address = shipping.address
             order.city = shipping.city
             order.state = shipping.state
+            order.delivery_fee = delivery_charge
             order.complete = True
             order.save()
             return redirect('store:home')
