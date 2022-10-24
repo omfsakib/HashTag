@@ -59,8 +59,10 @@ def loginUser(request):
             db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
             db_order.cupon_code = order['cupon_code']
             db_order.cupon_amount = order['cupon_amount']
+            db_order.address = shipping.address
+            db_order.city = shipping.city
+            db_order.state = shipping.state
             db_order.save()
-            shipping.order.add(db_order)
             for item in items:
                 product = Product.objects.get(id=item['product']['id'])
                 quantity = item['quantity']
@@ -165,7 +167,10 @@ def signUpUser(request):
             user.groups.add(group)
             if user is not None:
                 db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
-                shipping.order.add(db_order)
+                db_order.address = shipping.address
+                db_order.city = shipping.city
+                db_order.state = shipping.state
+                db_order.save()
                 for item in items:
                     product = Product.objects.get(id=item['product']['id'])
                     quantity = item['quantity']
@@ -217,6 +222,50 @@ def signUpUser(request):
 
         }
     return render(request,'accounts/registration.html',context)
+
+def accountProfile(request,pk):
+    #Navbar Section
+    navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
+    navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'nvCategorys':navbarCategorys,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'nvCategorys':navbarCategorys,
+                'cartItems':cartItems,
+            }
+    return render(request,'accounts/accountProfile.html',context)
 
 def home(request):
     #Navbar Section
@@ -730,7 +779,8 @@ def checkout(request):
             delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
             delivery_charge = delivery_charge_object.fee
         else:
-            delivery_charge = 120
+            delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Other')
+            delivery_charge = delivery_charge_object.fee
 
         
     if request.user.is_authenticated:
@@ -773,6 +823,9 @@ def checkout(request):
         
         if request.method == 'POST' and 'order_confirm' in request.POST: 
             order.status = 'Customer Confirmed'
+            order.address = shipping.address
+            order.city = shipping.city
+            order.state = shipping.state
             order.complete = True
             order.save()
             return redirect('store:home')
@@ -838,8 +891,10 @@ def checkout(request):
                 db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
                 db_order.cupon_code = order['cupon_code']
                 db_order.cupon_amount = order['cupon_amount']
+                db_order.address = shipping.address
+                db_order.city = shipping.city
+                db_order.state = shipping.state
                 db_order.save()
-                shipping.order.add(db_order)
                 for item in items:
                     product = Product.objects.get(id=item['product']['id'])
                     quantity = item['quantity']

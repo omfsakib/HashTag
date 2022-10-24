@@ -1,0 +1,81 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        
+	    $('.breadcrumb').before($('.heading-title'));
+    })
+</script>
+<style>
+    .breadcrumbs{
+        margin-bottom: 0px;
+    }
+    .account_img{
+        padding: 20px;
+    }
+    .account_img img{
+        max-height: 400px;
+        float: right;
+        border: 1px solid #f6f6f6;
+        border-radius: 15%;
+    }
+    .account_info{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 20px;
+    }
+    .account_name,.account_email,.account_telephone{
+        display: flex;
+        margin-bottom: 5px;
+    }
+    .account_info:last-child{
+        margin-bottom: 20px;
+    }
+    .account_name span,.account_email span,.account_telephone span{
+        width: 40%;    
+        margin-top: 6px;
+    }
+</style>
+<div class="container-fluid" style="margin-bottom: 20px;">
+    <h2 class="heading-title">Profile</h2>
+    <ul class="breadcrumb">
+        <li><a href="{% url 'store:home' %}">Home</a></li>
+        <li><a href="{% url 'store:account_profile' request.user.id %}">{{request.user.first_name}} {{request.user.last_name}}</a></li>
+    </ul>
+    <div class="main">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="account_img">
+                    <img src="{{request.user.customer.profile_pic.url}}" alt="">
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="account_info">
+                    <div class="account_name"> 
+                        <span>Name: </span> 
+                        <input type="text" class="form-control" value="{{request.user.first_name}} {{request.user.last_name}}">
+                    </div>
+                    <div class="account_email"> 
+                        <span>E-mail: </span> 
+                        <input type="text" class="form-control" value="{{request.user.email}}">
+                    </div>
+                    <div class="account_telephone"> 
+                        <span>Telephone: </span> 
+                        <input type="text" class="form-control" value="{{request.user.customer.phone }}">
+                    </div>
+                    <div class="account_created"> 
+                        <span>Date joined: </span> 
+                        <span>{{request.user.customer.date_created|date:'M d, Y' }}</span>
+                    </div>
+                    <div class="action_links" style="align-self:center">
+                        <button type="button" class="btn btn-sm btn-secondary">Change Password</button>
+                        <button type="button" class="btn btn-sm btn-info">Edit Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

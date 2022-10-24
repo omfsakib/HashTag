@@ -15,6 +15,7 @@ urlpatterns = [
     path('login/',views.loginUser,name="login"),
     path('logout/',views.logoutUser,name="logout"),
     path('signup/',views.signUpUser,name="sign_up"),
+    path('account/account_id=<str:pk>',views.accountProfile,name="account_profile"),
     path('',views.home,name="home"),
     path('blogs/',views.blogs,name="blogs"),
     path('product_id=<str:pk>/',views.productView,name="product_view"),

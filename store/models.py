@@ -169,6 +169,9 @@ class Order(models.Model):
     advance = models.FloatField(default=0,blank=True,null=True)
     due = models.FloatField(default=0,blank=True,null=True)
     status = models.CharField(default="Pending",max_length=200,blank=True, null=True,choices=STATUS)
+    address = models.CharField(max_length=200, null=True)
+    city = models.CharField(max_length=200, null=True)
+    state = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return str(self.id)
@@ -221,7 +224,6 @@ class OrderItem(models.Model):
 
 class ShippingAddress(models.Model):
     customer = models.OneToOneField(Customer, on_delete=models.CASCADE, blank=True, null=True)
-    order = models.ManyToManyField(Order)
     address = models.CharField(max_length=200, null=True)
     city = models.CharField(max_length=200, null=True)
     state = models.CharField(max_length=200, null=True)
