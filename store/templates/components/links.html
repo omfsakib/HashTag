@@ -42,7 +42,26 @@
 <script src="{% static 'catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'catalog/view/javascript/opentheme/ocslideshow/jquery.nivo.slider.js' %}" type="text/javascript"></script>
 <script src="{% static 'catalog/view/javascript/common.js' %}" type="text/javascript"></script>
+
 <link href="{% static 'images/favicon.png' %}" rel="icon" />
+<style>
+    
+#total-orders{
+    background-color: #4cb4c7;
+}
+#orders-delivered{
+    background-color: #7abecc ;
+}
+#orders-transit{
+    background-color:#40b8a1;
+}
+#orders-confirmed{
+    background-color: #73bfb0;
+}
+#orders-pending{
+    background-color: #70c8b7;
+}
+</style>
 
 <script>
     var user = '{{request.user}}'

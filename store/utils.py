@@ -387,3 +387,23 @@ def blogs_with_detailed_date(id):
         'month' : tmp_blog_month,
     }
     return blog
+
+def order_with_discount_details(id):
+    tmp_order = Order.objects.get(id = id)
+    tmp_user = tmp_order.customer.user
+    tmp_items = OrderItem.objects.filter(order = tmp_order)
+    sub_total = 0
+    charges = 0
+    for i in tmp_items:
+        sub_total += float(i.total)
+    if tmp_order.method == 'bkash':
+        charges = float(sub_total * 0.02)
+    elif tmp_order.method == 'nagad':
+        charges = float(sub_total * 0.01494)
+
+    order = {
+        'sub_total':sub_total,
+        'charges':charges,
+    }
+    return order
+    

@@ -154,7 +154,8 @@ class Order(models.Model):
     STATUS = (
         ('Pending','Pending'),
         ('Customer Confirmed','Customer Confirmed'),
-        ('Out for delivery', 'Out for delivery'),
+        ('Admin Confirmed','Admin Confirmed'),
+        ('In-Transit', 'In-Transit'),
         ('Delivered','Delivered')
     )
     customer = models.ForeignKey(Customer, null=True, on_delete= models.CASCADE)
@@ -162,6 +163,8 @@ class Order(models.Model):
     cupon_code =  models.CharField(default="None",max_length=200,blank=True, null=True)
     cupon_amount = models.FloatField(default=0,blank=True,null=True)
     transaction_id = models.CharField(max_length=200, null=True)
+    method = models.CharField(max_length=200, null=True)
+    member_amount = models.FloatField(default=0,blank=True,null=True)
     date_created = models.DateTimeField(auto_now_add=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     delivery_fee = models.FloatField(default=0,blank=True,null=True)

@@ -229,7 +229,22 @@ def signUpUser(request):
 def accountProfile(request,pk):
     user = request.user
     customer = request.user.customer
-    passwordChangeForm = PasswordChangeForm(user=request.user)
+    user_orders = Order.objects.filter(customer=customer,complete = True).order_by('-date_created')
+
+    #Status Section 
+    total_orders = user_orders.count()
+    delivered = user_orders.filter(status = 'Delivered').count()
+    transit = user_orders.filter(status = 'In-Transit').count()
+    confirmed = user_orders.filter(status = 'Admin Confirmed').count()
+    pending = user_orders.filter(status = 'Customer Confirmed').count()
+    
+    status = {
+        'total_orders':total_orders,
+        'delivered':delivered,
+        'transit':transit,
+        'confirmed':confirmed, 
+        'pending':pending,
+    }
 
     #Shipping Section
     shipping = ShippingAddress.objects.get(customer = customer)
@@ -316,7 +331,8 @@ def accountProfile(request,pk):
         
             total = float(price_total) + float(delivery_charge)
             context = {
-                'passwordChangeForm':passwordChangeForm,
+                'status':status,
+                'filterOrders':user_orders,
                 'nvCategorys':navbarCategorys,
                 'shipping':shipping,
                 'items':items,
@@ -331,7 +347,8 @@ def accountProfile(request,pk):
             }
         else:
             context = {
-                'passwordChangeForm':passwordChangeForm,
+                'status':status,
+                'filterOrders':user_orders,
                 'nvCategorys':navbarCategorys,
                 'shipping':shipping,
                 'cartItems':cartItems,
@@ -869,6 +886,7 @@ def checkout(request):
             member = True
             if cartTotal >= 2000 :
                 percentageAmount = float(cartTotal) * 0.05
+
         items = order.orderitem_set.all()
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount)) 
         nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order.cupon_amount) - float(percentageAmount)) 
@@ -877,10 +895,13 @@ def checkout(request):
             trxid = request.POST.get('trxid')
             amount = request.POST.get('amount')
             if method == 'bkash':
+                order.method = 'bkash'
                 order.total = float(bkash_total) + float(delivery_charge)
             elif method == 'nagad':
+                order.method = 'nagad'
                 order.total = float(nagad_total) + float(delivery_charge)
             if method == 'cod':
+                order.method = 'cod'
                 order.total = float(cartTotal) - float(order.cupon_amount) + float(delivery_charge) - float(percentageAmount)
                 trxid = 'Cash on delivery'
                 amount = 0
@@ -896,6 +917,7 @@ def checkout(request):
             order.status = 'Customer Confirmed'
             order.address = shipping.address
             order.city = shipping.city
+            order.member_amount = percentageAmount
             order.state = shipping.state
             order.delivery_fee = delivery_charge
             order.complete = True
@@ -1023,7 +1045,10 @@ def checkout(request):
                 user.groups.add(group)
                 if user is not None:
                     db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
-                    shipping.order.add(db_order)
+                    db_order.address = shipping.address
+                    db_order.state = shipping.state
+                    db_order.city = shipping.city
+                    db_order.save()
                     for item in items:
                         product = Product.objects.get(id=item['product']['id'])
                         quantity = item['quantity']
@@ -1564,3 +1589,56 @@ def blogs(request):
                 'cartItems':cartItems,
             }
     return render(request,'store/blogs.html',context)
+
+def view_order(request,pk):
+    user_order = Order.objects.get(id = pk)
+    user_order_items = OrderItem.objects.filter(order=user_order)
+
+    #Navbar Section
+    navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
+    navbarCategorys = navbarCategoryObject.categorys.all()
+
+    #Cart Item Section
+    delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+    delivery_charge = delivery_charge_object.fee
+    price_total = 0
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+        cartTotal = order.get_cart_total
+        items = order.orderitem_set.all()
+        total_items = items.count()
+        if total_items> 0:
+            for item in items:
+                product = Product.objects.get(id = item.product.id)
+                item.sizes = product.size.all()
+                item.colors = product.color.all()
+                item.image = ProductImages.objects.filter(product = product)[:1]
+                price_total += product.price
+        
+            total = float(price_total) + float(delivery_charge)
+            context = {
+                'viewOrder': user_order,
+                'viewItems': user_order_items,
+                'viewNeed':order_with_discount_details(pk),
+                'nvCategorys':navbarCategorys,
+                'items':items,
+                'cartItems':cartItems,
+                'cartTotal':cartTotal,
+                'order':order,
+                'item.image':item.image,
+                'item.sizes':item.sizes,
+                'item.colors':item.colors,
+                'delivery_charge':delivery_charge,
+                'total':total,
+            }
+        else:
+            context = {
+                'viewOrder': user_order,
+                'viewItems': user_order_items,
+                'viewNeed':order_with_discount_details(pk),
+                'nvCategorys':navbarCategorys,
+                'cartItems':cartItems,
+            }
+    return render(request,'store/viewOrder.html',context)

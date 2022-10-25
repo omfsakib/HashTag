@@ -75,14 +75,18 @@
     .breadcrumbs{
         margin-bottom: 0px;
     }
-    .account_img{
+    .account_img,
+    .account_links{
         padding: 20px;
     }
     .account_img img{
-        max-height: 400px;
+        max-height: 200px;
         border: 1px solid #f6f6f6;
         border-radius: 15%;
     }
+    /* .account_links a{
+        font-size: 15px;
+    } */
     .account_info,
     .billing_details,
     .password_change{
@@ -145,8 +149,25 @@
     <div class="main">
         <div class="row">
             <div class="col-sm-4">
-                <div class="account_img">
-                    <img src="{{request.user.customer.profile_pic.url}}" alt="">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="account_img">
+                            <img src="{{request.user.customer.profile_pic.url}}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="account_links">
+                            <div class="headers">
+                                <h2>Action Links</h2>
+                            </div>
+                            <div class="content">
+                                <a href="#user_dashboard">My orders(0)</a> <br>
+                                <a href="">Wishlist(0)</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-4">
@@ -251,6 +272,23 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+        <div class="container" id="user_dashboard">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="user_dashboard">
+                        <div class="heading text-center">
+                            <h2>Dashboard</h2>
+                        </div> <br> <hr> <br>
+                        <div class="count_table">
+                            {% include 'components/status.html' %}
+                        </div><br> <hr> <br>
+                        <div class="user_orders">
+                            {% include 'components/filterOrders.html' %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -20,6 +20,7 @@ urlpatterns = [
     path('blogs/',views.blogs,name="blogs"),
     path('product_id=<str:pk>/',views.productView,name="product_view"),
     path('category/category_id=<str:pk>/',views.categoryView,name="category_view"),
+    path('order/order_id=<str:pk>/',views.view_order,name="order_view"),
     path('blog/blog_id=<str:pk>/',views.blog,name="blog_view"),
     path('product/search=<str:searchtext>/',views.searchProduct,name="search_product"),
     path('cart/',views.cart,name="cart"),
