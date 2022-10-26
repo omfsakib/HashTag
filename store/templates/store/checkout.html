@@ -4,9 +4,8 @@
 <style>
     .checkout_profile{
         border: 1px solid #ddd;
-        border-radius: 50%;
+        border-radius: 25px;
         height: 140px;
-        float: right;
     }
     .checkbox_gateway {
         margin-top: 20px !important;
@@ -182,7 +181,7 @@
                                     <p>Address: {{shipping.address}}</p>
                                     <p>Area: {{shipping.state}}</p>
                                     <p>City: {{shipping.city}}</p>
-                                    <p>Want to edit shipping address? <a href="">Click here.</a> </p>
+                                    <p>Want to edit shipping address? <a href="{% url 'store:account_profile' shipping.customer.user.id %}#billing_details">Click here.</a> </p>
                                     <a type="button" href="#collapse-payment-method" data-toggle="collapse" data-parent="#accordion" class="accordion-toggle" aria-expanded="true" id="button-account"  class="btn btn-primary">Continue</a>
                                 </div>
                                 {% else %}

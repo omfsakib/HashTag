@@ -343,54 +343,54 @@
                                     <tr>
                                         <td class="text-center">{{order.product.product_code}}</td>
                                         <td class="text-left">{{order.product.name}}</td>
-                                        <td class="text-center">{{order.rate|floatformat:1}}&#2547;</td>
+                                        <td class="text-center">{{order.rate|floatformat:0}}&#2547;</td>
                                         <td class="text-center">{{order.quantity}}</td>
                                         <td class="text-center">{{order.size}}</td>
                                         <td class="text-center">{{order.color}}</td>
-                                        <td class="text-center">{{order.total|floatformat:1}}&#2547;</td>
+                                        <td class="text-center">{{order.total|floatformat:0}}&#2547;</td>
                                     </tr>
                                     {% endfor %}
                                     <tr>
                                         <td colspan="6" class="text-right">Subtotal : </td>
-                                        <td class="text-right">{{viewNeed.sub_total|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">{{viewNeed.sub_total|floatformat:0}}&#2547;</td>
                                     </tr>
                                     <tr>
                                         <td colspan="6"  class="text-right">
                                             {% if viewOrder.method == 'cod' %}
                                             COD (charges) :
                                             {% else %}
-                                            {{viewOrder.method}} - {{viewOrder.transaction_id}} (charges) :
+                                            {{viewOrder.method}} - TrxID: {{viewOrder.transaction_id}} (charges) :
                                             {% endif %}
                                         </td>
-                                        <td class="text-right">+ {{viewNeed.charges|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">+ {{viewNeed.charges|floatformat:0}}&#2547;</td>
                                     </tr>
                                     <tr>
                                         <td colspan="6"  class="text-right">Delivery charge :</td>
-                                        <td class="text-right">+ {{viewOrder.delivery_fee|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">+ {{viewOrder.delivery_fee|floatformat:0}}&#2547;</td>
                                     </tr>
                                     {% if viewOrder.cupon_amount > 0 %}
                                     <tr>
                                         <td colspan="6"  class="text-right">Cupon<span>( {{viewOrder.cupon_code}} )</span> :</td>
-                                        <td class="text-right">- {{viewOrder.cupon_amount|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">- {{viewOrder.cupon_amount|floatformat:0}}&#2547;</td>
                                     </tr>
                                     {% endif %}
                                     {% if viewOrder.member_amount > 0 %}
                                     <tr>
                                         <td colspan="6"  class="text-right">Member<span>( 5% discount )</span> :</td>
-                                        <td class="text-right">- {{viewOrder.member_amount|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">- {{viewOrder.member_amount|floatformat:0}}&#2547;</td>
                                     </tr>
                                     {% endif %}
                                     <tr>
                                         <td colspan="6"  class="text-right">Total<span>(With Charges)</span> :</td>
-                                        <td class="text-right"><span id="total_amount">{{viewOrder.total|floatformat:2}}</span>&#2547;</td>
+                                        <td class="text-right"><span id="total_amount">{{viewOrder.total|floatformat:0}}</span>&#2547;</td>
                                     </tr>
                                     <tr>
                                         <td colspan="6"  class="text-right">Paid :</td>
-                                        <td class="text-right">- {{viewOrder.advance|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">- {{viewOrder.advance|floatformat:0}}&#2547;</td>
                                     </tr>
                                     <tr>
                                         <td colspan="6"  class="text-right">Due :</td>
-                                        <td class="text-right">{{viewOrder.due|floatformat:2}}&#2547;</td>
+                                        <td class="text-right">{{viewOrder.due|floatformat:0}}&#2547;</td>
                                     </tr>
                                 </tbody>
                             </table>

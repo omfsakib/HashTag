@@ -201,6 +201,13 @@ class Order(models.Model):
         return total
     
 
+class WishList(models.Model):
+    customer =  models.OneToOneField(Customer, on_delete= models.CASCADE)
+    products = models.ManyToManyField(Product)
+
+    def __str__(self):
+        return self.customer.phone
+
 class Delivery_charge(models.Model):
     w_delivery = models.CharField(blank=True,null=True, max_length=100)
     fee = models.FloatField(default=0,blank=True,null=True)

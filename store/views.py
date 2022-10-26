@@ -246,6 +246,27 @@ def accountProfile(request,pk):
         'pending':pending,
     }
 
+    #Wish List Section
+    wish_products = []
+    total_wish_products = 0
+    if WishList.objects.filter(customer = customer).exists():
+        wish_object = WishList.objects.get(customer = customer)
+        for i in wish_object.products.all():
+            wish_products.append(productSerialize(i.id))
+        total_wish_products = wish_object.products.all().count()
+
+    wish_list = {
+        'total_products': total_wish_products,
+        'wish_products':wish_products,
+    }
+    if request.method == 'POST' and 'remove_wish' in request.POST:
+        remove_wish = request.POST.get('remove_wish')
+        wish_remove_product = Product.objects.get(id = remove_wish)
+        wish_remove_object = WishList.objects.get(customer = request.user.customer)
+        wish_remove_object.products.remove(wish_remove_product)
+        messages.success(request,'Product successfully removed from wish list!')
+        return redirect(reverse('store:account_profile', kwargs={'pk':pk}))
+
     #Shipping Section
     shipping = ShippingAddress.objects.get(customer = customer)
 
@@ -333,6 +354,7 @@ def accountProfile(request,pk):
             context = {
                 'status':status,
                 'filterOrders':user_orders,
+                'wish_list':wish_list,
                 'nvCategorys':navbarCategorys,
                 'shipping':shipping,
                 'items':items,
@@ -349,6 +371,7 @@ def accountProfile(request,pk):
             context = {
                 'status':status,
                 'filterOrders':user_orders,
+                'wish_list':wish_list,
                 'nvCategorys':navbarCategorys,
                 'shipping':shipping,
                 'cartItems':cartItems,
@@ -534,6 +557,22 @@ def productView(request,pk):
     images = ProductImages.objects.filter(product=product)
     big_img = ProductImages.objects.filter(product=product)[:1]
 
+    #WishList Section
+    if request.user.is_authenticated:
+        wish_customer = request.user.customer
+        if request.method == 'POST' and 'wish-List' in request.POST:
+            wish_product = request.POST.get('wish-List')
+            if WishList.objects.filter(customer = wish_customer).exists():
+                wish_object = WishList.objects.get(customer = wish_customer)
+            else:
+                wish_object = WishList.objects.create(customer = wish_customer)
+            wish_object.products.add(wish_product)
+            wish_object.save()
+            messages.success(request,'Product added to Wish List!')
+            return redirect(reverse('store:product_view', kwargs={'pk':pk}))
+
+            
+
     #Review Section
     reviews = []
     tmp_reviews = Review.objects.filter(product=product)
@@ -545,7 +584,7 @@ def productView(request,pk):
         product.rate = float(review_count/total_review)
         product.save()
 
-    if request.method == 'POST':
+    if request.method == 'POST' and 'review_comment' in request.POST:
         comment = request.POST.get('review_comment')
         rate = request.POST.get('review_rate')
         review_images = request.FILES.getlist('review_images')
@@ -555,6 +594,8 @@ def productView(request,pk):
         new_review.save()
         for i in review_images:
             new_image = ReviewImages.objects.create(review = new_review,img = i)
+        
+        messages.success(request,'Review added successfully!')
         return redirect(reverse('store:product_view', kwargs={'pk':pk}))
 
     #Releted Product Section
@@ -885,21 +926,21 @@ def checkout(request):
         if Subscription.objects.filter(email = request.user.email).exists():
             member = True
             if cartTotal >= 2000 :
-                percentageAmount = float(cartTotal) * 0.05
+                percentageAmount = math.floor(float(cartTotal) * 0.05)
 
         items = order.orderitem_set.all()
-        bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount)) 
-        nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order.cupon_amount) - float(percentageAmount)) 
+        bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount) + float(delivery_charge)) 
+        nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order.cupon_amount) - float(percentageAmount) + float(delivery_charge)) 
         if request.method == 'POST' and 'trxid' in request.POST: 
             method = request.POST.get('method')
             trxid = request.POST.get('trxid')
             amount = request.POST.get('amount')
             if method == 'bkash':
                 order.method = 'bkash'
-                order.total = float(bkash_total) + float(delivery_charge)
+                order.total = float(bkash_total)
             elif method == 'nagad':
                 order.method = 'nagad'
-                order.total = float(nagad_total) + float(delivery_charge)
+                order.total = float(nagad_total) 
             if method == 'cod':
                 order.method = 'cod'
                 order.total = float(cartTotal) - float(order.cupon_amount) + float(delivery_charge) - float(percentageAmount)
@@ -922,6 +963,7 @@ def checkout(request):
             order.delivery_fee = delivery_charge
             order.complete = True
             order.save()
+            messages.success(request,'Order completed! you can track order from dashboard!')
             return redirect('store:home')
 
         total_items = items.count()

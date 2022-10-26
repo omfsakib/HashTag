@@ -388,10 +388,16 @@
                                 <button type="button" id="button-cart" data-product="{{product.id}}"   data-action="add" class="btn update-cart">
                                     <i class="ion-bag"></i>Add to Cart
                                 </button>
-                            <div class="btn-actions">
-                                <button class="btn-wishlist" type="button" data-toggle="tooltip" class="btn btn-default" title="Add to Wish List"><i class="ion-android-favorite-outline"></i></button>
-                                <button class="btn-compare" type="button" data-toggle="tooltip" class="btn btn-default" title="Compare this Product"><i class="ion-android-options"></i></button>
-                            </div>
+                                
+                            {% if request.user.is_authenticated %}
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                <div class="btn-actions">
+                                    <button class="btn-wishlist" type="submit" name="wish-List" value="{{product.id}}" data-toggle="tooltip" class="btn btn-default" title="Add to Wish List"><i class="ion-android-favorite-outline"></i></button>
+                                
+                                </div>
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
