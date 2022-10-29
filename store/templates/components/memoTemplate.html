@@ -105,24 +105,6 @@
                         aboveTens();
                         break;
 
-                    //            This is optional. 
-
-                    //            case 9:
-                    //                if ((rev[i] == 0) || (rev[i + 1] == 1)) {
-                    //                    word[j] = '';
-                    //                }
-                    //                else {
-                    //                    word[j] = once[rev[i]];
-                    //                }
-                    //                if (rev[i + 1] !== '0' || rev[i] > '0') {
-                    //                    word[j] = word[j] + " Arab";
-                    //                }
-                    //                break;
-
-                    //            case 10:
-                    //                aboveTens();
-                    //                break;
-
                     default: break;
                 }
                 j++;
@@ -159,14 +141,24 @@
     <div class="action_links"  style="display: flex; justify-content:center;">
         <button class="btn btn-info" onclick="printDiv('memo')">Print</button><br> 
     </div> 
-    <div class="main" id="memo">
+    <div class="main" id="memo" style="display: flex; justify-content:center;">
         <div class="row" style="overflow: auto;">
-            <div class="col-sm-12" style="display: flex; justify-content:center;">
+            <div class="col-sm-12">
                 <div class="memo-template">
                     <style>
                         .row {
                             margin-right: -15px;
                             margin-left: -15px;
+                        }
+                        /* Hide scrollbar for Chrome, Safari and Opera */
+                        .row::-webkit-scrollbar {
+                            display: none;
+                        }
+
+                        /* Hide scrollbar for IE, Edge and Firefox */
+                        .row {
+                            -ms-overflow-style: none;  /* IE and Edge */
+                            scrollbar-width: none;  /* Firefox */
                         }
                         .memo-template{
                             border: 1px solid #ddd;
@@ -176,6 +168,7 @@
                         }
                         .memo-template::before{
                             content: "";
+                            width: 760px;
                             position: absolute;
                             top: 0px;
                             right: 0px;
@@ -185,8 +178,10 @@
                             background-position: center;
                             background-repeat: no-repeat;
                             opacity: 0.1;
+                            z-index: -999;
                         }
                         .customer_info .customer_details,
+                        .customer_info .billing_details,
                         .order_info .order_details,
                         .heading .logo{
                             display: flex;
@@ -205,15 +200,8 @@
                             align-content: space-between;
                         }
                         .amountinWords span,
+                        .customer_info .billing_details span,
                         .customer_info .customer_details span{
-                            border-bottom: 2px dotted #ddd;
-                        }
-                        .customer_info .billing_details span:first-child{
-                            width: 20%;
-                        }
-                        .customer_info .billing_details span:last-child{
-                            display: inline-block;
-                            width: 80%;
                             border-bottom: 2px dotted #ddd;
                         }
                         .table-bordered>tbody>tr>td{
@@ -321,7 +309,20 @@
                             <p>Telephone : <span>{{viewOrder.customer.phone}}</span></p>
                         </div>
                         <div class="billing_details">
-                            <p><span>Shipping address : </span> <span>{{viewOrder.address}}, {{viewOrder.state}}, {{viewOrder.city}}</span></p>
+                            <p>Shipping address : <span>{{viewOrder.address}}, {{viewOrder.state}}, {{viewOrder.city}}</span></p>
+                            <p>Status : <span>{% if viewOrder.status == 'Customer Confirmed' %}
+                                Pending
+                                {% elif viewOrder.status == 'Admin Confirmed' %}
+                                Confirmed
+                                {% elif viewOrder.status == 'In-Transit' %}
+                                In Transit
+                                {% elif viewOrder.status == 'Delivered' %}
+                                Delivered
+                                {% elif viewOrder.status == 'Return' %}
+                                Return
+                                {% else %}
+                                Cancel
+                                {% endif %}</span></p>
                         </div>
                     </div> <br>
                     <div class="orderitem_info">
@@ -359,7 +360,7 @@
                                             {% if viewOrder.method == 'cod' %}
                                             COD (charges) :
                                             {% else %}
-                                            {{viewOrder.method}} - TrxID: {{viewOrder.transaction_id}} (charges) :
+                                            {{viewOrder.method}} (charges) :
                                             {% endif %}
                                         </td>
                                         <td class="text-right">+ {{viewNeed.charges|floatformat:0}}&#2547;</td>

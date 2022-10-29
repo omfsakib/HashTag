@@ -148,7 +148,7 @@
     </ul>
     <div class="main">
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-4" style="display: flex; justify-content:center;">
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="account_img">
@@ -160,7 +160,7 @@
                     <div class="col-sm-12">
                         <div class="account_links">
                             <div class="headers">
-                                <h2>Action Links</h2>
+                                <h2 style="font-size:25px;">Action Links</h2>
                             </div>
                             <div class="content">
                                 <a href="#user_dashboard">My orders({{status.total_orders}})</a> <br>
@@ -179,15 +179,15 @@
                         </div>
                         <div class="account_name"> 
                             <span>Name: </span> 
-                            <input type="text" name="account_name" class="form-control editable input_modification" value="{{request.user.first_name}} {{request.user.last_name}}" disabled="disabled">
+                            <input type="text" name="account_name" required class="form-control editable input_modification" value="{{request.user.first_name}} {{request.user.last_name}}" disabled="disabled">
                         </div>
                         <div class="account_email"> 
                             <span>E-mail: </span> 
-                            <input type="text" name="account_email" class="form-control editable input_modification" value="{{request.user.email}}" disabled="disabled">
+                            <input type="text" name="account_email" required class="form-control editable input_modification" value="{{request.user.email}}" disabled="disabled">
                         </div>
                         <div class="account_telephone"> 
                             <span>Telephone: </span> 
-                            <input type="text" name="account_telephone" class="form-control editable input_modification" value="{{request.user.customer.phone }}" disabled="disabled">
+                            <input type="text" name="account_telephone" required class="form-control editable input_modification" value="{{request.user.customer.phone }}" disabled="disabled">
                         </div>
                         <div class="account_image"> 
                             <span>Change profile: </span>
@@ -215,15 +215,15 @@
                         </div>
                         <div class="old_password">
                             <span>Old password: </span>
-                            <input type="password" class="form-control" name="old_password" autocomplete="current-password" autofocus="" required="" id="id_old_password">
+                            <input type="password" class="form-control" name="old_password" autocomplete="current-password" autofocus="" required  id="id_old_password">
                         </div>
                         <div class="new_password1">
                             <span>New password: </span>
-                            <input type="password" class="form-control" name="new_password1" autocomplete="new-password" required="" id="id_new_password1" aria-autocomplete="list">
+                            <input type="password" class="form-control" name="new_password1" autocomplete="new-password" required  id="id_new_password1" aria-autocomplete="list">
                         </div>
                         <div class="new_password2">
                             <span>Confirm new password: </span>
-                            <input type="password" class="form-control" name="new_password2" autocomplete="new-password" required="" id="id_new_password2">
+                            <input type="password" class="form-control" name="new_password2" autocomplete="new-password" required  id="id_new_password2">
                         </div>
                         <div class="password_form-submit" style="align-self:center">
                             <button type="submit" class="btn btn-sm btn-primary">Submit</button>
@@ -241,15 +241,15 @@
                         </div>
                         <div class="billing_address">
                             <span>Address: </span>
-                            <input type="text" name="address" class="form-control editable input_modification" value="{{shipping.address}}" disabled="disabled">
+                            <input type="text" name="address" class="form-control editable input_modification" required value="{{shipping.address}}" disabled="disabled">
                         </div>
                         <div class="billing_state">
                             <span>Area: </span>
-                            <input type="text" name="state" class="form-control editable input_modification" value="{{shipping.state}}" disabled="disabled">
+                            <input type="text" name="state" class="form-control editable input_modification" required value="{{shipping.state}}" disabled="disabled">
                         </div>
                         <div class="billing_city">
                             <span>City: </span>
-                            <input type="text" class="form-control demo_input_city input_modification" value="{{shipping.city}}" disabled="disabled">
+                            <input type="text" class="form-control demo_input_city input_modification" required value="{{shipping.city}}" disabled="disabled">
                             <div class="city_modification" style="margin-left: -9%;">
                                 {% if shipping.city == 'Dhaka' %}
                                 <input type="radio" name="city"  value="{{shipping.city}}" style="margin-right:5px;" checked>Dhaka</input> <br>

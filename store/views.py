@@ -18,7 +18,6 @@ import json
 import datetime
 
 # Create your views here.
-
 def logoutUser(request):
     logout(request)
     return redirect('store:home')
@@ -226,6 +225,7 @@ def signUpUser(request):
         }
     return render(request,'accounts/registration.html',context)
 
+@login_required(login_url='store:login')
 def accountProfile(request,pk):
     user = request.user
     customer = request.user.customer
@@ -895,27 +895,25 @@ def checkout(request):
     #Navbar Section
     navbarCategoryObject =  IndivitualCategory.objects.get(category_for = 'navbar')
     navbarCategorys = navbarCategoryObject.categorys.all()
-    
-    shipping = None
+
     delivery_charge = 60
     
     member = False
     percentageAmount = 0
     
-
-    if shipping != None:
-        if shipping.city == 'Dhaka':
-            delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
-            delivery_charge = delivery_charge_object.fee
-        else:
-            delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Other')
-            delivery_charge = delivery_charge_object.fee
-
         
     if request.user.is_authenticated:
         
         customer = request.user.customer
         shipping = ShippingAddress.objects.get(customer = customer)
+        if shipping.city == 'Dhaka':
+            delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Dhaka')
+            delivery_charge = delivery_charge_object.fee
+
+        else:
+            delivery_charge_object = Delivery_charge.objects.get(w_delivery= 'Other')
+            delivery_charge = delivery_charge_object.fee
+
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         if Order.objects.filter(customer=customer,complete=True,cupon_code = order.cupon_code).exists():
             order.cupon_code += '- expired'
@@ -931,16 +929,18 @@ def checkout(request):
         items = order.orderitem_set.all()
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount) + float(delivery_charge)) 
         nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order.cupon_amount) - float(percentageAmount) + float(delivery_charge)) 
-        if request.method == 'POST' and 'trxid' in request.POST: 
+        rocket_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount) + float(delivery_charge)) 
+        if request.method == 'POST' and 'method' in request.POST: 
             method = request.POST.get('method')
-            trxid = request.POST.get('trxid')
-            amount = request.POST.get('amount')
             if method == 'bkash':
                 order.method = 'bkash'
                 order.total = float(bkash_total)
             elif method == 'nagad':
                 order.method = 'nagad'
                 order.total = float(nagad_total) 
+            elif method == 'rocket':
+                order.method = 'rocket'
+                order.total = float(rocket_total) 
             if method == 'cod':
                 order.method = 'cod'
                 order.total = float(cartTotal) - float(order.cupon_amount) + float(delivery_charge) - float(percentageAmount)
@@ -948,8 +948,6 @@ def checkout(request):
                 amount = 0
 
 
-            order.transaction_id = trxid
-            order.advance = amount
             order.due = float(order.total) - float(order.advance)
             order.save()
             return redirect('store:checkout')
@@ -984,6 +982,7 @@ def checkout(request):
                 'shipping':shipping,
                 'bkash_total':bkash_total,
                 'nagad_total':nagad_total,
+                'rocket_total':rocket_total,
                 'item.image':item.image,
                 'delivery_charge':delivery_charge
             }
@@ -999,6 +998,7 @@ def checkout(request):
                 'shipping':shipping,
                 'bkash_total':bkash_total,
                 'nagad_total':nagad_total,
+                'rocket_total':rocket_total,
                 'delivery_charge':delivery_charge
             }
 
@@ -1024,7 +1024,7 @@ def checkout(request):
             if user is not None:
                 customer = Customer.objects.get(phone = login_username)
                 shipping = ShippingAddress.objects.get(customer = customer)
-                db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
+                db_order,created = Order.objects.get_or_create(customer=customer, complete=False)
                 db_order.cupon_code = order['cupon_code']
                 db_order.cupon_amount = order['cupon_amount']
                 db_order.address = shipping.address
@@ -1048,6 +1048,7 @@ def checkout(request):
                     orderItem.total = total
                     orderItem.save()
                 login(request,user)
+                return redirect('store:checkout')
                 
             messages.success(request,'Login Successfull!')
 
@@ -1086,7 +1087,7 @@ def checkout(request):
                 group = Group.objects.get(name = 'customer')
                 user.groups.add(group)
                 if user is not None:
-                    db_order, created = Order.objects.get_or_create(customer=customer, complete=False)
+                    db_order,created = Order.objects.get_or_create(customer=customer, complete=False)
                     db_order.address = shipping.address
                     db_order.state = shipping.state
                     db_order.city = shipping.city
@@ -1108,6 +1109,7 @@ def checkout(request):
                         orderItem.total = total
                         orderItem.save()
                     login(request,user)
+                    return redirect('store:checkout')
                     
             messages.success(request,'SignuP Successfull!')
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order['cupon_amount']))
@@ -1131,6 +1133,7 @@ def checkout(request):
                 'nvCategorys':navbarCategorys,
                 'bkash_total':bkash_total,
                 'nagad_total':nagad_total,
+                'rocket_total':rocket_total,
                 'item.image':item['image'],
                 'delivery_charge':delivery_charge
             }
@@ -1146,6 +1149,7 @@ def checkout(request):
                 'shipping':shipping,
                 'bkash_total':bkash_total,
                 'nagad_total':nagad_total,
+                'rocket_total':rocket_total,
                 'delivery_charge':delivery_charge
             }
     return render(request,'store/checkout.html',context)
@@ -1632,6 +1636,8 @@ def blogs(request):
             }
     return render(request,'store/blogs.html',context)
 
+
+@login_required(login_url='store:login')
 def view_order(request,pk):
     user_order = Order.objects.get(id = pk)
     user_order_items = OrderItem.objects.filter(order=user_order)
@@ -1684,3 +1690,62 @@ def view_order(request,pk):
                 'cartItems':cartItems,
             }
     return render(request,'store/viewOrder.html',context)
+
+
+class shopDashboard(View):
+
+    def get(self,request):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            orders = []
+            tmp_orders = Order.objects.filter(complete = True).order_by('-date_created')
+            
+            #Status Section 
+            total_orders = tmp_orders.count()
+            delivered = tmp_orders.filter(status = 'Delivered').count()
+            transit = tmp_orders.filter(status = 'In-Transit').count()
+            confirmed = tmp_orders.filter(status = 'Admin Confirmed').count()
+            pending = tmp_orders.filter(status = 'Customer Confirmed').count()
+            returns = tmp_orders.filter(status = 'Return').count()
+            cancel = tmp_orders.filter(status = 'Cancel').count()
+
+            status = {
+                'total_orders':total_orders,
+                'delivered':delivered,
+                'transit':transit,
+                'confirmed':confirmed, 
+                'pending':pending,
+                'return':returns,
+                'cancel':cancel
+            }
+
+            for i in tmp_orders:
+                orders.append(orderFetch(i.id))
+            return JsonResponse({'orders':orders,'status':status})
+        context = {}
+        return render(request,'shop/pages/shopDashboard.html',context)
+
+
+def updateOrder(request,pk):
+    user_order = Order.objects.get(id = pk)
+    user_order_items = OrderItem.objects.filter(order=user_order)
+    if request.method ==  'POST' and 'status' in request.POST:
+        status = request.POST.get('status')
+        user_order.status = status
+        user_order.save()
+        messages.success(request,'Status updated!')
+        return redirect(reverse('store:update-order', kwargs={'pk':pk}))
+
+    if request.method ==  'POST' and 'amount' in request.POST:
+        amount = request.POST.get('amount')
+        user_order.advance += float(amount)
+        user_order.due = float(user_order.total) - float(user_order.advance)
+        user_order.save()
+        messages.success(request,'Amount added!')
+        return redirect(reverse('store:update-order', kwargs={'pk':pk}))
+
+    context = {
+        'viewOrder': user_order,
+        'viewItems': user_order_items,
+        'viewNeed':order_with_discount_details(pk),
+        }
+    return render(request,'shop/pages/updateOrder.html',context)

@@ -17,7 +17,7 @@
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
   display: none;
-  position: absolute;
+  position: relative;
   background-color: #fff;
   margin-top: 5px;
   width: auto;
@@ -110,7 +110,7 @@
                             </td>
                             <td class="text-left">
                                 <div class="input-group btn-block" style="max-width: 200px;">
-                                    <input type="text" disabled value="{{item.quantity}}" size="1" class="form-control">
+                                    <input type="text" disabled value="{{item.quantity}}" size="1" class="form-control" style="min-width: 40px;">
                                     <span class="input-group-btn">
                                     <button type="button"  title="" class="btn btn-primary update-cart" data-toggle="tooltip" data-original-title="Increase" data-product="{{item.product.id}}" data-action="add"><i class="fa fa-angle-up" aria-hidden="true"></i></button>
                                     <button type="button"  title="" class="btn btn-danger update-cart" data-toggle="tooltip" data-original-title="Decrease" data-product="{{item.product.id}}" data-action="remove"><i class="fa fa-angle-down" aria-hidden="true"></i></button>

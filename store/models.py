@@ -156,7 +156,9 @@ class Order(models.Model):
         ('Customer Confirmed','Customer Confirmed'),
         ('Admin Confirmed','Admin Confirmed'),
         ('In-Transit', 'In-Transit'),
-        ('Delivered','Delivered')
+        ('Delivered','Delivered'),
+        ('Return','Return'),
+        ('Cancel','Cancel')
     )
     customer = models.ForeignKey(Customer, null=True, on_delete= models.CASCADE)
     complete = models.BooleanField(default=False)

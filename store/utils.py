@@ -332,7 +332,6 @@ def checkout_login_handle(request):
         username = user_1.username
 
     user = authenticate(request,username=username, password=password)
-    print(user)
 
 def category_with_products(id):
     categoryProducts = []
@@ -400,10 +399,37 @@ def order_with_discount_details(id):
         charges = float(sub_total * 0.02)
     elif tmp_order.method == 'nagad':
         charges = float(sub_total * 0.01494)
+    elif tmp_order.method == 'rocket':
+        charges = float(sub_total * 0.02)
 
     order = {
         'sub_total':sub_total,
         'charges':charges,
+    }
+    return order
+
+def orderFetch(id):
+    tmp_order = Order.objects.get(id = id)
+    
+    if tmp_order.status == 'Customer Confirmed':
+        status = 'Pending'
+    elif tmp_order.status == 'Admin Confirmed':
+        status = 'Confirmed'
+    elif tmp_order.status == 'In-Transit':
+        status = 'In Transit'
+    elif tmp_order.status == 'Delivered':
+        status = 'Delivered'
+    else:
+        status = 'Cancel'
+    date_created = tmp_order.date_created.date()
+    order = {
+        'id':tmp_order.id,
+        'status':status,
+        'method':tmp_order.method,
+        'date_created':date_created,
+        'total':tmp_order.total,
+        'advance':tmp_order.advance,
+        'due':tmp_order.due,
     }
     return order
     
