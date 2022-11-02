@@ -28,5 +28,7 @@ urlpatterns = [
     path('checkout/',views.checkout,name="checkout"),
     path('update_item/',views.updateItem, name="update_item"),
     path('shop/dashboard/',shopDashboard.as_view(), name="shop_dashboard"),
-    path('shop/view/order/<str:pk>/',views.updateOrder, name = 'update-order')
+    path('shop/view/order/<str:pk>/',views.updateOrder, name = 'update-order'),
+    path('shop/products/',views.products, name = 'products'),
+    path('shop/product_id=<str:pk>/',views.shopProductView,name="shop_product_view"),
 ]

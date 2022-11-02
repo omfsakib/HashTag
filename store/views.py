@@ -898,6 +898,7 @@ def checkout(request):
 
     delivery_charge = 60
     
+    shipping = None
     member = False
     percentageAmount = 0
     
@@ -944,8 +945,6 @@ def checkout(request):
             if method == 'cod':
                 order.method = 'cod'
                 order.total = float(cartTotal) - float(order.cupon_amount) + float(delivery_charge) - float(percentageAmount)
-                trxid = 'Cash on delivery'
-                amount = 0
 
 
             order.due = float(order.total) - float(order.advance)
@@ -1114,6 +1113,7 @@ def checkout(request):
             messages.success(request,'SignuP Successfull!')
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order['cupon_amount']))
         nagad_total = math.ceil(float(cartTotal) + float(cartTotal * 0.01494) - float(order['cupon_amount']))
+        rocket_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order['cupon_amount'])) 
         
         total_items = len(items)
         if total_items> 0:
@@ -1749,3 +1749,120 @@ def updateOrder(request,pk):
         'viewNeed':order_with_discount_details(pk),
         }
     return render(request,'shop/pages/updateOrder.html',context)
+
+def products(request):
+    products = []
+    tmp_products = Product.objects.all().order_by('-date_created')
+    for i in tmp_products:
+        products.append(productSerialize(i.id))
+
+    product_categorys = Category.objects.all().order_by('name')
+    product_sizes = Size.objects.all().order_by('size')
+    product_colors = Color.objects.all().order_by('color')
+
+    #Add Product Section
+    if request.method == 'POST' and 'product_name' in request.POST:
+        name = request.POST.get('product_name')
+        price = request.POST.get('product_price')
+        code = request.POST.get('product_code')
+        stock = request.POST.get('product_stock')
+        description = request.POST.get('product_description')
+        categorys = request.POST.getlist('product_categorys')
+        sizes = request.POST.getlist('product_sizes')
+        colors = request.POST.getlist('product_colors')
+        image = request.FILES.get('product_image')
+        zoom_image = request.FILES.get('product_image2')
+        new_product = Product.objects.create(
+            name = name,
+            price = price,
+            product_code = code,
+            stock = stock,
+            description = description,
+        )
+        for category in categorys:
+            new_product.category.add(category)
+        
+        for size in sizes:
+            new_product.size.add(size)
+        
+        for color in colors:
+            new_product.color.add(color)
+
+        prodduct_img = ProductImages.objects.create(
+            product = new_product,
+            n_img = image,
+            Z_img = zoom_image
+        )
+        messages.success(request,'Product added successfully!')
+        return redirect('store:products')
+    
+    #Delete Product Section
+    if request.method == 'POST' and 'product_delete' in request.POST:
+        id = request.POST.get('product_delete')
+        delete_product = Product.objects.get(id = id)
+        images_of_delete_products = ProductImages.objects.filter(product = delete_product)
+        for i in images_of_delete_products:
+            i.delete()
+        delete_product.delete()
+        messages.success(request,'Product deleted seccessfully!')
+        return redirect('store:products')
+
+    #Add Category Section
+    if request.method == 'POST' and 'category_name' in request.POST:
+        category_name = request.POST.get('category_name')
+        new_category = Category.objects.create(name=category_name)
+        messages.success(request,'Category added seccessfully!')
+        return redirect('store:products')
+    
+    #Delete Category Section
+    if request.method == 'POST' and 'category_delete' in request.POST:
+        id = request.POST.get('category_delete')
+        delete_category = Category.objects.get(id = id)
+        delete_category.delete()
+        messages.success(request,'Category deleted seccessfully!')
+        return redirect('store:products')
+    
+     #Add Color Section
+    if request.method == 'POST' and 'color_name' in request.POST:
+        color_name = request.POST.get('color_name')
+        new_color = Color.objects.create(color=color_name)
+        messages.success(request,'Color added seccessfully!')
+        return redirect('store:products')
+    
+    #Delete Color Section
+    if request.method == 'POST' and 'color_delete' in request.POST:
+        id = request.POST.get('color_delete')
+        delete_color = Color.objects.get(id = id)
+        delete_color.delete()
+        messages.success(request,'Color deleted seccessfully!')
+        return redirect('store:products')
+
+    #Add Size Section
+    if request.method == 'POST' and 'size_name' in request.POST:
+        size_name = request.POST.get('size_name')
+        new_size = Size.objects.create(size=size_name)
+        messages.success(request,'Size added seccessfully!')
+        return redirect('store:products')
+    
+    #Delete Size Section
+    if request.method == 'POST' and 'size_delete' in request.POST:
+        id = request.POST.get('size_delete')
+        delete_size = Size.objects.get(id = id)
+        delete_size.delete()
+        messages.success(request,'Size deleted seccessfully!')
+        return redirect('store:products')
+
+    context = {
+        'products':products,
+        'categorys':product_categorys,
+        'sizes':product_sizes,
+        'colors':product_colors,
+    }
+    return render(request,'shop/pages/products.html',context)
+
+def shopProductView(request,pk):
+
+    context={
+
+    }
+    return render(request,'shop/pages/productView.html',context)

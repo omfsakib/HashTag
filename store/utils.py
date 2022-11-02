@@ -239,6 +239,24 @@ def productSerialize(id):
             'image_4' : product_image_4,
             'image_5' : product_image_5
         }
+    else:
+        product_with_image = {
+            'id':product.id,
+            'name':product.name,
+            'price':product.price,
+            'category':product.category.all(),
+            'color':color,
+            'first_color':first_color,
+            'size':sizes,
+            'first_size':first_size,
+            'product_code':product.product_code,
+            'description':product.description,
+            'date_created':product.date_created,
+            'stock':product.stock,
+            'discount':product.discount,
+            'discount_amount':product.discount_amount,
+            'rate':product.rate,
+        }
     return product_with_image
 
 def cookieCart(request):  
