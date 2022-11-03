@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.views import View
 from .models import *
 from .utils import *
+from .forms import *
 import math
 import json
 import datetime
@@ -1804,14 +1805,14 @@ def products(request):
         for i in images_of_delete_products:
             i.delete()
         delete_product.delete()
-        messages.success(request,'Product deleted seccessfully!')
+        messages.success(request,'Product deleted successfully!')
         return redirect('store:products')
 
     #Add Category Section
     if request.method == 'POST' and 'category_name' in request.POST:
         category_name = request.POST.get('category_name')
         new_category = Category.objects.create(name=category_name)
-        messages.success(request,'Category added seccessfully!')
+        messages.success(request,'Category added successfully!')
         return redirect('store:products')
     
     #Delete Category Section
@@ -1819,14 +1820,14 @@ def products(request):
         id = request.POST.get('category_delete')
         delete_category = Category.objects.get(id = id)
         delete_category.delete()
-        messages.success(request,'Category deleted seccessfully!')
+        messages.success(request,'Category deleted successfully!')
         return redirect('store:products')
     
      #Add Color Section
     if request.method == 'POST' and 'color_name' in request.POST:
         color_name = request.POST.get('color_name')
         new_color = Color.objects.create(color=color_name)
-        messages.success(request,'Color added seccessfully!')
+        messages.success(request,'Color added successfully!')
         return redirect('store:products')
     
     #Delete Color Section
@@ -1834,14 +1835,14 @@ def products(request):
         id = request.POST.get('color_delete')
         delete_color = Color.objects.get(id = id)
         delete_color.delete()
-        messages.success(request,'Color deleted seccessfully!')
+        messages.success(request,'Color deleted successfully!')
         return redirect('store:products')
 
     #Add Size Section
     if request.method == 'POST' and 'size_name' in request.POST:
         size_name = request.POST.get('size_name')
         new_size = Size.objects.create(size=size_name)
-        messages.success(request,'Size added seccessfully!')
+        messages.success(request,'Size added successfully!')
         return redirect('store:products')
     
     #Delete Size Section
@@ -1849,7 +1850,7 @@ def products(request):
         id = request.POST.get('size_delete')
         delete_size = Size.objects.get(id = id)
         delete_size.delete()
-        messages.success(request,'Size deleted seccessfully!')
+        messages.success(request,'Size deleted successfully!')
         return redirect('store:products')
 
     context = {
@@ -1861,8 +1862,95 @@ def products(request):
     return render(request,'shop/pages/products.html',context)
 
 def shopProductView(request,pk):
+    #Product Section
+    product = Product.objects.get(id=pk)
+    images = ProductImages.objects.filter(product=product)
+    big_img = ProductImages.objects.filter(product=product)[:1]
+    product_categorys = Category.objects.all().order_by('name')
+    product_sizes = Size.objects.all().order_by('size')
+    product_colors = Color.objects.all().order_by('color')
+
+    #Update Product Section
+    form = ProductForm(instance=product)
+    if request.method == "POST" and 'name' in request.POST:
+        stock = request.POST.get('edit_product_stock')
+        form = ProductForm(request.POST,instance=product)
+        if form.is_valid():
+            form.save()
+            product.stock += int(stock)
+            product.save()
+            messages.success(request,'Product updated successfully!')
+            return redirect(reverse('store:shop_product_view', kwargs={'pk':pk}))
+        else:
+            print(form.errors)
+            form = ProductForm(instance=product)
+    
+    #Delete Product Section
+    if request.method == 'POST' and 'product_delete' in request.POST:
+        id = request.POST.get('product_delete')
+        delete_product = Product.objects.get(id = id)
+        images_of_delete_products = ProductImages.objects.filter(product = delete_product)
+        for i in images_of_delete_products:
+            i.delete()
+        delete_product.delete()
+        messages.success(request,'Product deleted successfully!')
+        return redirect(reverse('store:shop_product_view', kwargs={'pk':pk}))
+    
+    #Delete Review Section
+    if request.method == 'POST' and 'review_delete' in request.POST:
+        id = request.POST.get('review_delete')
+        delete_review = Review.objects.get(id = id)
+        images_of_delete_review = ReviewImages.objects.filter(review = delete_review)
+        for i in images_of_delete_review:
+            i.delete()
+        delete_review.delete()
+        messages.success(request,'Review deleted successfully!')
+        return redirect(reverse('store:shop_product_view', kwargs={'pk':pk}))
+
+    #Upload Image Section
+    if request.method == 'POST' and 'product_id' in request.POST:
+        product_id = request.POST.get('product_id')
+        image = request.FILES.get('product_image')
+        zoom_image = request.FILES.get('product_image2')
+        print(product_id)
+        img_product = Product.objects.get(id = product_id)
+        new_images = ProductImages.objects.create(product = img_product)
+        new_images.n_img = image
+        new_images.Z_img = zoom_image
+        new_images.save()
+        messages.success(request,'Image added successfully!')
+        return redirect(reverse('store:shop_product_view', kwargs={'pk':pk}))
+
+    #Delete Image Section
+    if request.method == 'POST' and 'image_delete' in request.POST:
+        id = request.POST.get('image_delete')
+        delete_image = ProductImages.objects.get(id = id)
+        delete_image.delete()
+        messages.success(request,'Image deleted successfully!')
+        return redirect(reverse('store:shop_product_view', kwargs={'pk':pk}))
+
+    #Review Section
+    reviews = []
+    tmp_reviews = Review.objects.filter(product=product)
+    total_review = tmp_reviews.count()
+    review_count = 0
+    for i in tmp_reviews:
+        reviews.append(reviews_with_images(i.id))
+        review_count += i.rate
+        product.rate = float(review_count/total_review)
+        product.save()
+
+    
 
     context={
-
+        'product':product,
+        'images':images,
+        'big_img':big_img,
+        'total_review':total_review,
+        'reviews':reviews,
+        'categorys':product_categorys,
+        'sizes':product_sizes,
+        'colors':product_colors,
+        'form':form
     }
     return render(request,'shop/pages/productView.html',context)
