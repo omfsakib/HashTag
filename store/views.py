@@ -1954,3 +1954,295 @@ def shopProductView(request,pk):
         'form':form
     }
     return render(request,'shop/pages/productView.html',context)
+
+
+def storeSettings(request):
+    #Neccesary Items
+    categorys = Category.objects.all()
+
+    #Banner Section
+    homebannerItems = HomeBannerCategory.objects.all()[:3]
+    total_home_banner_items = homebannerItems.count()
+
+    #Upload Home Banner
+    if request.method == 'POST' and 'title_heading' in request.POST:
+        title_heading = request.POST.get('title_heading')
+        sub_title_heading = request.POST.get('sub_title_heading')
+        short_description = request.POST.get('short_description')
+        estimated_category = request.POST.get('estimated_category')
+        banner_img = request.FILES.get('banner_img')
+        added_category = Category.objects.get(id = estimated_category)
+        if HomeBannerCategory.objects.filter(estimated_category = added_category).exists():
+            messages.error(request,'Category already in use!')
+            return redirect('store:store_setting')
+        else:
+            new_home_banner =  HomeBannerCategory.objects.create(estimated_category = added_category)
+            new_home_banner.title_heading = title_heading
+            new_home_banner.sub_title_heading = sub_title_heading
+            new_home_banner.short_description = short_description
+            new_home_banner.banner_img = banner_img
+            new_home_banner.save()
+            messages.success(request,'Banner created successfully!')
+            return redirect('store:store_setting')
+
+    #Update Home Banner
+    if request.method == "POST" and 'banner_id' in request.POST:
+        banner_id = request.POST.get('banner_id')
+        update_banner_title = request.POST.get('update_banner_title')
+        update_banner_subheading = request.POST.get('update_banner_subheading')
+        update_short_description = request.POST.get('update_short_description')
+        update_estimated_category = request.POST.get('update_estimated_category')
+        update_banner_img = request.FILES.get('update_banner_img')
+        update_home_banner_object = HomeBannerCategory.objects.get(id = banner_id)
+        update_home_banner_object.title_heading = update_banner_title
+        update_home_banner_object.sub_title_heading = update_banner_subheading
+        update_home_banner_object.short_description = update_short_description
+        update_new_category = Category.objects.get(id = update_estimated_category)
+        update_home_banner_object.estimated_category = update_new_category
+        if update_banner_img:
+            update_home_banner_object.banner_img = update_banner_img
+        update_home_banner_object.save()
+        messages.success(request,'Banner updated successfully!')
+        return redirect('store:store_setting')
+    
+    #Delete Home Banner
+    if request.method == 'POST' and 'home_banner_delete' in request.POST:
+        id =  request.POST.get('home_banner_delete')
+        delete_banner_object =  HomeBannerCategory.objects.get(id = id)
+        delete_banner_object.delete()
+        messages.success(request,'Banner deleted successfully!')
+        return redirect('store:store_setting')
+
+    #Collection 
+    collectionItems = CollectionCategory.objects.all()[:3]
+    total_collection_items = collectionItems.count()
+
+    #Upload Collection
+    if request.method == 'POST' and 'heading' in request.POST:
+        heading = request.POST.get('heading')
+        sub_heading = request.POST.get('sub_heading')
+        up_estimated_category = request.POST.get('estimated_category')
+        img = request.FILES.get('img')
+        added_category = Category.objects.get(id = up_estimated_category)
+        if CollectionCategory.objects.filter(estimated_category = added_category).exists():
+            messages.error(request,'Category already in use!')
+            return redirect('store:store_setting')
+        else:
+            new_collection =  CollectionCategory.objects.create(estimated_category = added_category)
+            new_collection.heading = heading
+            new_collection.sub_heading = sub_heading
+            new_collection.img = img
+            new_collection.save()
+            messages.success(request,'Collection created successfully!')
+            return redirect('store:store_setting')
+
+    #Update Collection
+    if request.method == 'POST' and 'collection_id' in request.POST:
+        collection_id = request.POST.get('collection_id')
+        update_collection_title = request.POST.get('update_collection_title')
+        update_collection_subheading = request.POST.get('update_collection_subheading')
+        update_collection_estimated_category = request.POST.get('update_collection_estimated_category')
+        update_collection_img = request.FILES.get('update_collection_img')
+        update_collection_object = CollectionCategory.objects.get(id = collection_id)
+        update_collection_object.heading  = update_collection_title
+        update_collection_object.sub_heading = update_collection_subheading
+        update_new_category_collection = Category.objects.get(id = update_collection_estimated_category)
+        update_collection_object.estimated_category = update_new_category_collection
+        if update_collection_img:
+            update_collection_object.img
+        update_collection_object.save()
+
+        messages.success(request,'Collection updated successfully!')
+        return redirect('store:store_setting')
+    
+    
+    #Delete Collection
+    if request.method == 'POST' and 'collection_delete' in request.POST:
+        id =  request.POST.get('collection_delete')
+        delete_collection_object =  CollectionCategory.objects.get(id = id)
+        delete_collection_object.delete()
+        messages.success(request,'Collection deleted successfully!')
+        return redirect('store:store_setting')
+
+    #ShopNow Category
+    shopnowItems = ShopNowCategorys.objects.all()[:2]
+    total_shopnow_items = shopnowItems.count()
+
+    #Upload ShopNow Category
+    if request.method == 'POST' and 'category_for' in request.POST:
+        title = request.POST.get('title')
+        sub_title = request.POST.get('sub_title')
+        category_for = request.POST.get('category_for')
+        sn_estimated_category = request.POST.get('estimated_category')
+        up_img = request.FILES.get('img')
+        added_category = Category.objects.get(id = sn_estimated_category)
+        if ShopNowCategorys.objects.filter(estimated_category = added_category).exists():
+            messages.error(request,'Category already in use!')
+            return redirect('store:store_setting')
+        else:
+            new_shopnow =  ShopNowCategorys.objects.create(estimated_category = added_category)
+            new_shopnow.title = title
+            new_shopnow.sub_title = sub_title
+            new_shopnow.category_for = category_for
+            new_shopnow.img = up_img
+            new_shopnow.save()
+            messages.success(request,'Banner created successfully!')
+            return redirect('store:store_setting')
+
+     #Update ShopNow Category
+    if request.method == 'POST' and 'shopnow_id' in request.POST:
+        shopnow_id = request.POST.get('shopnow_id')
+        update_shopnow_title = request.POST.get('update_shopnow_title')
+        update_shopnow_subheading = request.POST.get('update_shopnow_subheading')
+        update_shopnow_category_for = request.POST.get('update_shopnow_category_for')
+        update_shopnow_estimated_category = request.POST.get('update_shopnow_estimated_category')
+        update_shopnow_img = request.FILES.get('update_shopnow_img')
+        update_shopnow_object = ShopNowCategorys.objects.get(id = shopnow_id)
+        update_shopnow_object.title  = update_shopnow_title
+        update_shopnow_object.sub_title = update_shopnow_subheading
+        update_shopnow_object.category_for = update_shopnow_category_for
+        update_new_category_shopnow = Category.objects.get(id = update_shopnow_estimated_category)
+        update_shopnow_object.estimated_category = update_new_category_shopnow
+        if update_shopnow_img:
+            update_shopnow_object.img
+        update_shopnow_object.save()
+
+        messages.success(request,'Shop Now Category updated successfully!')
+        return redirect('store:store_setting')
+
+    #Delete ShopNow Category
+    if request.method == 'POST' and 'shopnow_delete' in request.POST:
+        id =  request.POST.get('shopnow_delete')
+        delete_shopnow_object =  ShopNowCategorys.objects.get(id = id)
+        delete_shopnow_object.delete()
+        messages.success(request,'Shop Now Category deleted successfully!')
+        return redirect('store:store_setting')
+
+    
+    #Latest Arrivals
+    ltproducts = []
+    lt_object =  LatestArrivals.objects.get(products_for = 'latestarrivals')
+    for i in lt_object.products.all():
+        ltproducts.append(productSerialize(i.id))
+    
+    products = []
+    tmp_products = Product.objects.all().order_by('-date_created')
+    for i in tmp_products:
+        if i in lt_object.products.all():
+            pass
+        else:
+            products.append(productSerialize(i.id))
+    
+    #Add Products To Latest Arrivals
+    if request.method == 'POST' and 'products_id_list' in request.POST:
+        products_id_list = request.POST.getlist('products_id_list')
+        for i in products_id_list:
+            add_product = Product.objects.get(id = i)
+            lt_object.products.add(add_product)
+
+        messages.success(request,'Product added to latest arrivals!')
+        return redirect('store:store_setting')
+
+    #Remove Products From Latest Arrivals
+    if request.method == 'POST' and 'latest_delete' in request.POST:
+        id =  request.POST.get('latest_delete')
+        remove_product = Product.objects.get(id = id)
+        lt_object.products.remove(remove_product)
+        messages.success(request,'Product removed from latest arrivals!')
+        return redirect('store:store_setting')
+
+    
+    #Indivitual Category Section
+    nvCategorys = IndivitualCategory.objects.get(category_for = 'navbar')
+    total_nvCategorys = nvCategorys.categorys.all().count()
+    mvCategorys = IndivitualCategory.objects.get(category_for = 'mvcategory')
+    total_mvCategorys = mvCategorys.categorys.all().count()
+
+    #Add Category
+    if request.method == 'POST' and 'category_id_list' in request.POST:
+        add_category_for_indivitual = request.POST.get('add_category_for_indivitual')
+        category_id_list = request.POST.getlist('category_id_list')
+        add_category_for = IndivitualCategory.objects.get(category_for = add_category_for_indivitual)
+        for i in category_id_list:
+            to_be_add_category = Category.objects.get(id = i)
+            add_category_for.categorys.add(to_be_add_category)
+
+        messages.success(request,'Categorys added to indivitual categorys!')
+        return redirect('store:store_setting')
+
+    #Remove Category
+    if request.method == 'POST' and 'category_for_indivitual' in request.POST:
+        category_for_indivitual = request.POST.get('category_for_indivitual')
+        category_remove = request.POST.get('category_remove')
+        remove_category = Category.objects.get(id = category_remove)
+        remove_category_indivitual = IndivitualCategory.objects.get(category_for = category_for_indivitual)
+        remove_category_indivitual.categorys.remove(remove_category)
+        messages.success(request,'Category removed from indivitual categorys!')
+        return redirect('store:store_setting')
+
+
+    context = {
+        'homebannerItems':homebannerItems,
+        'total_home_banner_items':total_home_banner_items,
+        'collectionItems':collectionItems,
+        'total_collection_items':total_collection_items,
+        'shopnowItems':shopnowItems,
+        'total_shopnow_items':total_shopnow_items,
+        'ltproducts':ltproducts,
+        'products':products,
+        'categorys':categorys,
+        'nvCategorys':nvCategorys,
+        'total_nvCategorys':total_nvCategorys,
+        'mvCategorys':mvCategorys,
+        'total_mvCategorys':total_mvCategorys
+    }
+    return render(request,'shop/pages/storeSetting.html',context)
+
+
+
+def bannerSetting(request,pk):
+    banner = HomeBannerCategory.objects.get(id = pk)
+    category_id = banner.estimated_category.id
+    category_name = banner.estimated_category.name
+
+    context = {
+        'id':banner.id,
+        'title_heading':banner.title_heading,
+        'sub_title_heading':banner.sub_title_heading,
+        'short_description':banner.short_description,
+        'category_id' :category_id,
+        'estimated_category':category_name,
+        'banner_img':banner.banner_img.url
+    }
+    return JsonResponse({'banner':context})
+
+def collectionSetting(request,pk):
+    collection = CollectionCategory.objects.get(id = pk)
+    category_id = collection.estimated_category.id
+    category_name = collection.estimated_category.name
+
+    context = {
+        'id':collection.id,
+        'heading':collection.heading,
+        'sub_heading':collection.sub_heading,
+        'category_id' :category_id,
+        'estimated_category':category_name,
+        'img':collection.img.url
+    }
+    return JsonResponse({'collection':context})
+
+def shopnowSetting(request,pk):
+    shopnow = ShopNowCategorys.objects.get(id = pk)
+    category_id = shopnow.estimated_category.id
+    category_name = shopnow.estimated_category.name
+
+    context = {
+        'id':shopnow.id,
+        'heading':shopnow.title,
+        'sub_heading':shopnow.sub_title,
+        'category_for':shopnow.category_for,
+        'category_id' :category_id,
+        'estimated_category':category_name,
+        'img':shopnow.img.url
+    }
+    return JsonResponse({'shopnow':context})
