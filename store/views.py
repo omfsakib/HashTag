@@ -2246,3 +2246,169 @@ def shopnowSetting(request,pk):
         'img':shopnow.img.url
     }
     return JsonResponse({'shopnow':context})
+
+def createOrder(request):
+    #Neccessary Items
+    products = []
+    tmp_products = Product.objects.all().order_by('-date_created')
+    for i in tmp_products:
+        products.append(productSerialize(i.id))
+    sizes = Size.objects.all().order_by('size')
+    colors = Color.objects.all().order_by('color')
+    offileOrder, created = Order.objects.get_or_create(complete = False,transaction_id = 'offline-order',status = 'Admin Confirmed')
+    offileItems = OrderItem.objects.filter(order = offileOrder)
+    total_offlineItems = offileItems.count()
+    viewNeed = order_with_discount_details(offileOrder.id)
+
+    #Add Customer
+    if request.method == 'POST' and 'phone' in request.POST:
+        phone = request.POST.get('phone')
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        address = request.POST.get('address')
+        area = request.POST.get('area')
+        city = request.POST.get('city')
+        if User.objects.filter(username = phone).exists():
+            add_user = User.objects.get(username = phone)
+            add_customer = Customer.objects.get(user = add_user)
+            shipping = ShippingAddress.objects.get(customer = add_customer)
+
+        elif Customer.objects.filter(phone = phone).exists():
+            add_customer = Customer.objects.get(phone = phone)
+            shipping = ShippingAddress.objects.get(customer = add_customer)
+        
+        else: 
+            add_user = User.objects.create(username = phone)
+            add_customer = Customer.objects.create(user = add_user)
+            shipping = ShippingAddress.objects.create(customer = add_customer)
+            add_user.email = email
+            add_user.first_name = name
+            add_user.set_password(phone[-6:])
+            add_customer.phone = phone
+            shipping.address = address
+            shipping.state = area
+            shipping.city = city
+            add_user.save()
+            add_customer.save()
+            shipping.save()
+        
+        offileOrder.customer = add_customer
+        offileOrder.address = shipping.address
+        offileOrder.state = shipping.state
+        offileOrder.city = shipping.city
+        if offileOrder.city == 'Dhaka':
+            delivery_fee_object = Delivery_charge.objects.get(w_delivery = 'Dhaka')
+            delivery_fee = delivery_fee_object.fee
+        else:
+            delivery_fee_object = Delivery_charge.objects.get(w_delivery = 'Other')
+            delivery_fee = delivery_fee_object.fee
+        offileOrder.delivery_fee = delivery_fee
+        offileOrder.total += offileOrder.delivery_fee
+        offileOrder.save()
+        messages.success(request,'Customer added to the order!')
+        return redirect('store:create_order')
+
+
+    #Add To Shopping Cart
+    if request.method == 'POST' and 'product_id' in request.POST:
+        product_id = request.POST.get('product_id')
+        quantity = request.POST.get('quantity')
+        size = request.POST.get('size')
+        color = request.POST.get('color')
+        added_product = Product.objects.get(id = product_id)
+        item_added ,created = OrderItem.objects.get_or_create(order = offileOrder, product = added_product)
+        item_added.quantity += int(quantity)
+        item_added.rate = math.ceil(float(added_product.price))
+        item_added.total = math.ceil(float(added_product.price) * float(item_added.quantity))
+        offileOrder.total += math.ceil(float(item_added.total))
+        offileOrder.save()
+        item_added.size = size
+        item_added.color = color
+        item_added.save()
+        messages.success(request,'Product added to shopping cart!')
+        return redirect('store:create_order')
+    
+    #Remove From Shopping Cart
+    if request.method == 'POST' and 'remove-item' in request.POST:
+        remove_item = request.POST.get('remove-item')
+        item_object = OrderItem.objects.get(id = remove_item)
+        offileOrder.total -= math.ceil(float(item_object.total))
+        offileOrder.save()
+        item_object.delete()
+        messages.success(request,'Item removed from shopping cart!')
+        return redirect('store:create_order')
+    
+    #Method & Paid:
+    if request.method == 'POST' and 'payment_method' in request.POST:
+        payment_method = request.POST.get('payment_method')
+        paid_amount = request.POST.get('paid_amount')
+        offileOrder.method = payment_method
+        if offileOrder.method == 'bkash':
+            charges = float(float(viewNeed['sub_total']) * 0.02)
+        elif offileOrder.method == 'nagad':
+            charges = float(float(viewNeed['sub_total']) * 0.01494)
+        elif offileOrder.method == 'rocket':
+            charges = float(float(viewNeed['sub_total']) * 0.02)
+        else: 
+            charges = 0
+        offileOrder.total += math.ceil(charges)
+        offileOrder.advance += math.ceil(float(paid_amount))
+        offileOrder.due = math.ceil(offileOrder.total - offileOrder.advance)
+        offileOrder.save()
+        messages.success(request,'Method & Paid updated!')
+        return redirect('store:create_order')
+
+    #Confirm Order
+    if request.method == 'POST' and 'confirm_order' in request.POST:
+        offileOrder.complete = True
+        offileOrder.save()
+        messages.success(request,'Order completed!')
+        return redirect('store:shop_dashboard')
+
+    if total_offlineItems > 0:
+        for item in offileItems:
+            item.image = ProductImages.objects.filter(product = item.product)[:1]
+        context = {
+            'viewOrder':offileOrder,
+            'viewItems':offileItems,
+            'viewNeed':viewNeed,
+            'products':products,
+            'sizes':sizes,
+            'colors':colors,
+            'item.image':item.image,
+            'total_items':total_offlineItems,
+        }
+    else:
+        context = {
+            'viewOrder':offileOrder,
+            'viewItems':offileItems,
+            'viewNeed':viewNeed,
+            'products':products,
+            'sizes':sizes,
+            'colors':colors,
+            'total_items':total_offlineItems,
+        }
+    return render(request,'shop/pages/createOrder.html',context)
+
+def fetchCustomer(*arg,**kwargs):
+    phone = kwargs.pop('phone')
+    if User.objects.filter(username = phone).exists() or Customer.objects.filter(phone = phone).exists():
+        user = User.objects.get(username = phone)
+        customer = Customer.objects.get(user = user)
+        shipping = ShippingAddress.objects.get(customer = customer)
+        context = {
+            'name' : user.first_name,
+            'email' : user.email,
+            'address' :shipping.address,
+            'area':shipping.state,
+            'city':shipping.city,
+        }
+    else:
+        context = {
+            'name' : '',
+            'email' : '',
+            'address' : '',
+            'area': '',
+            'city': '',
+        }
+    return JsonResponse({'customer':context})

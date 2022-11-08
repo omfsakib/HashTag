@@ -35,4 +35,6 @@ urlpatterns = [
     path('shop/store/banner/<str:pk>',views.bannerSetting,name="banner_setting"),
     path('shop/store/collection/<str:pk>',views.collectionSetting,name="collection_setting"),
     path('shop/store/shopnow/<str:pk>',views.shopnowSetting,name="shopnow_setting"),
+    path('shop/store/create/order',views.createOrder,name="create_order"),
+    path('shop/store/customer/<str:phone>',views.fetchCustomer,name="fetch_customer"),
 ]

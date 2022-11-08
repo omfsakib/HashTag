@@ -407,7 +407,6 @@ def blogs_with_detailed_date(id):
 
 def order_with_discount_details(id):
     tmp_order = Order.objects.get(id = id)
-    tmp_user = tmp_order.customer.user
     tmp_items = OrderItem.objects.filter(order = tmp_order)
     sub_total = 0
     charges = 0

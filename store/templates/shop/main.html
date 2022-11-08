@@ -121,7 +121,10 @@
                                             <a href="{% url 'store:products' %}">Products</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'store:store_setting' %}">Settings</a>
+                                            <a href="{% url 'store:store_setting' %}">Store Settings</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'store:create_order' %}">Create Order</a>
                                         </li>
                                     </ul> 
 				
@@ -148,7 +151,14 @@
 				            <div id="pt_menu_home" class="pt_menu">
                                 <div class="parentMenu">
                                     <a href="{% url 'store:store_setting' %}">
-                                        <span>Settings</span>
+                                        <span>Store Settings</span>
+                                    </a>
+                                </div>
+                            </div>
+				            <div id="pt_menu_home" class="pt_menu">
+                                <div class="parentMenu">
+                                    <a href="{% url 'store:create_order' %}">
+                                        <span>Create Order</span>
                                     </a>
                                 </div>
                             </div>

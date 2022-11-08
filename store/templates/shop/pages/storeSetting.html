@@ -21,8 +21,9 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        max-width: 500px;
-        max-height: 200px;
+        max-width: 88%;
+        max-height: 88%;    
+        min-width: 350px;
         background-color: #ddddddf5;
         border: 1px solid #eee;
         box-sizing: border-box;
@@ -31,19 +32,6 @@
         display: none;    
         border-radius: 20px;
         /*to hide popup initially*/
-    }
-    .upload-collection-section,
-    .collection-edit-section,
-    .upload-banner-section,
-    .banner-edit-section,
-    .shopnow-edit-section,
-    .upload-shopnow-section,
-    .add-latest,
-    .add-navigation,
-    .add-mostviwed{
-        max-width: 88%;
-        max-height: 88%;    
-        min-width: 350px;
     }
     .close-btn {
         position: absolute;
@@ -116,7 +104,9 @@
     
     function toggleEditHomeBannerPopup(id){
         $(".banner-edit-section").toggle();
-        getBanner(id)
+        if(id){
+            getBanner(id)
+        }
         async function getBanner(id){
             let response = await fetch('/shop/store/banner/'+id,{
                 method: 'get',
@@ -137,7 +127,9 @@
     }
     function toggleEditCollectionPopup(id){
         $(".collection-edit-section").toggle();
-        getCollection(id)
+        if(id){
+            getCollection(id)
+        }
         async function getCollection(id){
             let response = await fetch('/shop/store/collection/'+id,{
                 method: 'get',
@@ -157,7 +149,9 @@
     }
     function toggleEditShopNowPopup(id){
         $(".shopnow-edit-section").toggle();
-        getShopNow(id)
+        if(id){
+            getShopNow(id)
+        }
         async function getShopNow(id){
             let response = await fetch('/shop/store/shopnow/'+id,{
                 method: 'get',
@@ -539,7 +533,7 @@
         ×
     </div>
     <div class="content">
-        {% if total_shopnow_items >= 3 %}
+        {% if total_shopnow_items >= 2 %}
         <div class="slider-upload-error">
             <p><strong>Note :</strong> You can only set 2 categorys in your shop now categorys. <br>
             To upload with a new category please make sure you have less than 2 categorys uploaded. <br>
