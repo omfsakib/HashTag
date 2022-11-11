@@ -449,4 +449,21 @@ def orderFetch(id):
         'due':tmp_order.due,
     }
     return order
+
+def customerControl(pk):
+    tmp_customer = Customer.objects.get(id = pk)
+    orders =  Order.objects.filter(customer = tmp_customer, complete = True)
+    total_orders = orders.count()
+
+    customer = {
+        'id': tmp_customer.id,
+        'name': tmp_customer.user.first_name,
+        'phone':tmp_customer.phone,
+        'email': tmp_customer.user.email,
+        'total_orders': total_orders,
+
+    }
+    return customer
+
+
     

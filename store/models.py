@@ -258,3 +258,12 @@ class LatestArrivals(models.Model):
 
     def __str__(self):
         return self.products_for
+
+class DiscountDetails(models.Model):
+    category = models.ForeignKey(Category, null = True,blank=True ,on_delete=models.CASCADE)
+    name =  models.CharField(max_length=200,blank=True, null=True)
+    percentage = models.IntegerField(default=0,null=True,blank=True)
+    products = models.ManyToManyField(Product)
+
+    def __str__(self):
+        return self.name

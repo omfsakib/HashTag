@@ -317,6 +317,7 @@
                     </form>
                 </div>
             </div>
+            {% if viewOrder.total > 0 and viewOrder.method and viewOrder.address %}
             <div class="col-sm-12">
                 <div class="content" style="display: flex; justify-content:center">
                     <form method="POST">
@@ -325,6 +326,7 @@
                     </form>
                 </div> <br> <hr>
             </div>
+            {% endif %}
             <div class="col-sm-12" style="overflow: auto;">
                 {% include 'components/memoTemplate.html' %}
             </div>

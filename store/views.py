@@ -2412,3 +2412,142 @@ def fetchCustomer(*arg,**kwargs):
             'city': '',
         }
     return JsonResponse({'customer':context})
+
+def controlPanel(request):
+    #Neccessary Items
+    products = []
+    tmp_products = Product.objects.all().order_by('-date_created')
+    for i in tmp_products:
+        if i.discount <= 0 :
+            products.append(productSerialize(i.id))
+        else:
+            pass
+
+
+    #Customer Items
+    customers = []
+    tmp_customers = Customer.objects.all().order_by('-date_created')
+    for i in tmp_customers:
+        customers.append(customerControl(i.id))
+    total_customers = tmp_customers.count()
+
+    #Delivery Charge
+    delivery_charge_objects = Delivery_charge.objects.all()[:2]
+    if request.method == 'POST' and 'w_delivery' in request.POST:
+        w_delivery = request.POST.get('w_delivery')
+        fee = request.POST.get('fee')
+        update_charge_object = Delivery_charge.objects.get(w_delivery = w_delivery)
+        update_charge_object.fee = int(fee)
+        update_charge_object.save()
+        messages.success(request,'Delivery fee updated!')
+        return redirect('store:control_panel')
+
+    #Discount Section
+    discounts = DiscountDetails.objects.all()
+
+    #Add Discount
+    if request.method == 'POST' and 'discount_name' in request.POST:
+        discount_name = request.POST.get('discount_name')
+        percentage = request.POST.get('percentage')
+        discount_products = request.POST.getlist('products')
+        new_discount_category = Category.objects.create(name = discount_name)
+        new_discount_object = DiscountDetails.objects.create(category = new_discount_category)
+        new_discount_object.name = discount_name
+        new_discount_object.percentage = percentage
+        for i in discount_products:
+            added_product = Product.objects.get(id = i)
+            added_product.discount = int(percentage)
+            added_product.discount_amount = math.floor(float(added_product.price) * (float(percentage) / 100))
+            added_product.price -= added_product.discount_amount
+            added_product.category.add(new_discount_category)
+            added_product.featured = True
+            added_product.save()
+            new_discount_object.products.add(added_product)
+        new_discount_object.save()
+
+        messages.success(request,'Discount created successfully!')
+        return redirect('store:control_panel')
+    
+    #Add Products to Discount
+    if request.method == 'POST' and 'add_product_list' in request.POST:
+        add_product_list = request.POST.getlist('add_product_list')
+        discount_object = DiscountDetails.objects.get(id = request.POST.get('discount_id'))
+        for i in add_product_list:
+            product_object = Product.objects.get(id = i)
+            product_object.discount = int(discount_object.percentage)
+            product_object.discount_amount = math.floor(float(product_object.price) * (float(discount_object.percentage) / 100))
+            product_object.price -= product_object.discount_amount
+            product_object.category.add(discount_object.category)
+            product_object.featured = True
+            product_object.save()
+            discount_object.products.add(product_object)
+
+        messages.success(request,'Products added to the discount!')
+        return redirect('store:control_panel')
+    
+    #Remove Products from Discount
+    if request.method == 'POST' and 'remove_product_list' in request.POST:
+        remove_product_list = request.POST.getlist('remove_product_list')
+        remove_discount_object = DiscountDetails.objects.get(id = request.POST.get('discount_id'))
+        for i in remove_product_list:
+            remove_product_object = Product.objects.get(id = i)
+            remove_product_object.discount = 0
+            remove_product_object.price += remove_product_object.discount_amount
+            remove_product_object.discount_amount = 0
+            remove_product_object.category.remove(remove_discount_object.category)
+            remove_product_object.featured = False
+            remove_product_object.save()
+            remove_discount_object.products.remove(remove_product_object)
+
+        messages.success(request,'Products removed from the discount!')
+        return redirect('store:control_panel')
+    
+    #Delete Discount
+    if request.method == 'POST' and 'remove_discount' in request.POST:
+        delete_discount_object = DiscountDetails.objects.get(id = request.POST.get('remove_discount'))
+        delete_category = delete_discount_object.category
+        for i in delete_discount_object.products.all():
+            delete_product_object = Product.objects.get(id = i.id)
+            delete_product_object.discount = 0
+            delete_product_object.price += delete_product_object.discount_amount
+            delete_product_object.discount_amount = 0
+            delete_product_object.category.remove(delete_discount_object.category)
+            delete_product_object.featured = False
+            delete_product_object.save()
+            delete_discount_object.products.remove(delete_product_object)
+
+        delete_discount_object.delete()
+        delete_category.delete()
+
+        messages.success(request,'Discount deleted successfully!')
+        return redirect('store:control_panel')
+
+    context = {
+        'total_customers':total_customers,
+        'customers':customers,
+        'delivery_charge_objects':delivery_charge_objects,
+        'products':products,
+        'discounts':discounts,
+    }
+    return render(request,'shop/pages/controlPanel.html',context)
+
+
+def customerDetails(request,pk):
+    customer =  Customer.objects.get(id = pk)
+    shipping = ShippingAddress.objects.get(customer = customer)
+    orders = []
+    tmp_orders =  Order.objects.filter(customer = customer, complete = True).order_by('-date_created')
+    total_orders = tmp_orders.count()
+    for i in tmp_orders:
+        orders.append(orderFetch(i.id))
+    context = {
+            'name' : customer.user.first_name,
+            'email' : customer.user.email,
+            'image' : customer.profile_pic.url,
+            'address' : shipping.address,
+            'area': shipping.state,
+            'city': shipping.city,
+            'total_orders': total_orders,
+            'orders':orders,
+        }
+    return JsonResponse({'details':context})
