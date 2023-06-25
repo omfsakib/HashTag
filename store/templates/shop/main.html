@@ -96,7 +96,24 @@
                 </a>
             </div>
         </div>
-	
+        	
+	    <div class="block-right pull-right">
+            <div class="search-containers pull-right" style="margin-right: 12px;">
+                <div class="search-container">
+                    <a href="{% url 'store:logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
+                </div>
+            </div>	
+            <div class="search-containers pull-right" style="margin-right: 12px;">
+                <div class="search-container">
+                    <a href="http://127.0.0.1:8000/admin"><i class="fa fa-indent" aria-hidden="true"></i></a>
+                </div>
+            </div>	
+            <div class="search-containers pull-right" style="margin-right: 12px;">
+                <div class="search-container">
+                    <a href="{% url 'store:home' %}"><i class="fa fa-globe" aria-hidden="true"></i></a>
+                </div>
+            </div>			
+        </div>	
 	    <div class="container">
 		    <div class="main-menu">
 				<div class="hozmenu-container">
@@ -119,6 +136,9 @@
                                         </li>
                                         <li>
                                             <a href="{% url 'store:products' %}">Products</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'store:shop_blogs' %}">Blogs</a>
                                         </li>
                                         <li>
                                             <a href="{% url 'store:store_setting' %}">Store Settings</a>
@@ -148,6 +168,13 @@
                                 <div class="parentMenu">
                                     <a href="{% url 'store:products' %}">
                                         <span>Products</span>
+                                    </a>
+                                </div>
+                            </div>
+				            <div id="pt_menu_home" class="pt_menu">
+                                <div class="parentMenu">
+                                    <a href="{% url 'store:shop_blogs' %}">
+                                        <span>Blogs</span>
                                     </a>
                                 </div>
                             </div>

@@ -145,6 +145,7 @@ class Blog(models.Model):
     place = models.CharField(max_length=200,blank=True, null=True)
     description = models.TextField(max_length=2000,blank=True, null=True)
     img = models.ImageField(default="product-pic.jpg",null = True,blank = True)
+    video = models.FileField(null = True,blank = True)
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -493,12 +493,12 @@
                             {% for product in products %}
                             <tr>
                                 <td class="text-center">
-                                     <a class="img-link" href="#">
+                                     <a class="img-link" href="{% url 'store:shop_product_view' product.id %}">
                                         <img src="{{product.image_1}}" alt="{{product.name}}" title="{{product.name}}" class="img-thumbnail">
                                     </a> 
                                 </td>
                                 <td class="text-left">
-                                    <a href="#">{{product.name}}</a>                                                 
+                                    <a href="{% url 'store:shop_product_view' product.id %}">{{product.name}}</a>                                                 
                                 </td>
                                 <td class="text-center">
                                    <p>{{product.price|floatformat:0}}&#2547;</p>

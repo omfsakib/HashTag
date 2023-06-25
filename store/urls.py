@@ -30,6 +30,7 @@ urlpatterns = [
     path('shop/dashboard/',shopDashboard.as_view(), name="shop_dashboard"),
     path('shop/view/order/<str:pk>/',views.updateOrder, name = 'update-order'),
     path('shop/products/',views.products, name = 'products'),
+    path('shop/blogs/',views.shopBlogs, name = 'shop_blogs'),
     path('shop/product_id=<str:pk>/',views.shopProductView,name="shop_product_view"),
     path('shop/store/setting/',views.storeSettings,name="store_setting"),
     path('shop/store/banner/<str:pk>/',views.bannerSetting,name="banner_setting"),

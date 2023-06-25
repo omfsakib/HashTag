@@ -10,10 +10,12 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.views import View
 from .models import *
 from .utils import *
 from .forms import *
+from .decorators import *
 import math
 import json
 import datetime
@@ -46,13 +48,16 @@ def loginUser(request):
 
         try:
             user_1 = User.objects.get(username = login_username)
-            username = user.username
+            username = user_1.username
         except:
             customer_1 = Customer.objects.get(phone = login_username)
             user_1 =  customer_1.user
             username = user_1.username
 
         user = authenticate(request,username=username, password=password)
+        login(request,user)
+        if user_1.groups.all()[0].name == 'admin':
+            return redirect('store:shop_dashboard')
         if user is not None:
             customer = Customer.objects.get(phone = login_username)
             shipping = ShippingAddress.objects.get(customer = customer)
@@ -79,7 +84,6 @@ def loginUser(request):
                 orderItem.rate = rate,
                 orderItem.total = total
                 orderItem.save()
-            login(request,user)
             messages.success(request,'Login Successfull!')
             return redirect('store:home')
         else:
@@ -557,7 +561,9 @@ def productView(request,pk):
     product = Product.objects.get(id = pk)
     images = ProductImages.objects.filter(product=product)
     big_img = ProductImages.objects.filter(product=product)[:1]
-
+    demo_price = 0
+    if product.discount > 0:
+        demo_price = product.price + product.discount_amount
     #WishList Section
     if request.user.is_authenticated:
         wish_customer = request.user.customer
@@ -638,6 +644,7 @@ def productView(request,pk):
                 'cartItems':cartItems,
                 'cartTotal':cartTotal,
                 'order':order,
+                'demo_price':demo_price,
                 'item.image':item.image,
                 'item.sizes':item.sizes,
                 'item.colors':item.colors,
@@ -648,6 +655,7 @@ def productView(request,pk):
         else:
             context = {
                 'product':product,
+                'demo_price':demo_price,
                 'nvCategorys':navbarCategorys,
                 'images':images,
                 'big_img':big_img,
@@ -683,6 +691,7 @@ def productView(request,pk):
                 'reviews':reviews,
                 'total_review':total_review,
                 'items':items,
+                'demo_price':demo_price,
                 'cartItems':cartItems,
                 'cartTotal':cartTotal,
                 'order':order,
@@ -696,6 +705,7 @@ def productView(request,pk):
         else:
             context = {
                 'product':product,
+                'demo_price':demo_price,
                 'nvCategorys':navbarCategorys,
                 'images':images,
                 'big_img':big_img,
@@ -925,8 +935,7 @@ def checkout(request):
         cartTotal = order.get_cart_total
         if Subscription.objects.filter(email = request.user.email).exists():
             member = True
-            if cartTotal >= 2000 :
-                percentageAmount = math.floor(float(cartTotal) * 0.05)
+            percentageAmount = math.floor(float(cartTotal) * 0.05)
 
         items = order.orderitem_set.all()
         bkash_total = math.ceil(float(cartTotal) + float(cartTotal * 0.02) - float(order.cupon_amount) - float(percentageAmount) + float(delivery_charge)) 
@@ -1056,8 +1065,7 @@ def checkout(request):
             name =  request.POST.get('reg_name')
             email =  request.POST.get('reg_email')
             phone =  request.POST.get('reg_phone')
-            password1 =  request.POST.get('reg_password1')
-            password2 =  request.POST.get('reg_password2')
+            reg_subscribe =  request.POST.get('reg_subscribe')
             address =  request.POST.get('address')
             area =  request.POST.get('area')
             city =  request.POST.get('city')
@@ -1067,17 +1075,16 @@ def checkout(request):
             elif Customer.objects.filter(phone = phone).first():
                 messages.error(request, 'Phone is used on another account.')
                 return redirect('store:checkout')
-            elif password1 != password2:
-                messages.error(request, "Password didn't match!.")
-                return redirect('store:checkout')
             else:
                 user = User.objects.create(first_name = name, email=email,username=phone)
-                user.set_password(password1)
+                user.set_password(phone[-6:])
                 user.save()
                 customer = Customer.objects.create(
                         user = user,
                         phone = phone,
                 )
+                if reg_subscribe == 'Yes':
+                    member = Subscription.objects.create(email = email)
                 shipping =  ShippingAddress.objects.create(
                     customer = customer,
                     address = address,
@@ -1199,6 +1206,7 @@ def categoryView(request,pk):
         products = priceProducts
         necessaryItems['pricedetails']['start_price'] = start_price
         necessaryItems['pricedetails']['end_price'] = end_price
+        
 
     categoryWithDetailedProduct = []
     allCategorys = Category.objects.all()
@@ -1692,7 +1700,8 @@ def view_order(request,pk):
             }
     return render(request,'store/viewOrder.html',context)
 
-
+decorators = [shopowner_only,allowed_users(allowed_roles=['admin']),login_required(login_url='store:login')]
+@method_decorator(decorators, name='dispatch')
 class shopDashboard(View):
 
     def get(self,request):
@@ -1725,7 +1734,9 @@ class shopDashboard(View):
         context = {}
         return render(request,'shop/pages/shopDashboard.html',context)
 
-
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
 def updateOrder(request,pk):
     user_order = Order.objects.get(id = pk)
     user_order_items = OrderItem.objects.filter(order=user_order)
@@ -1751,6 +1762,9 @@ def updateOrder(request,pk):
         }
     return render(request,'shop/pages/updateOrder.html',context)
 
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
 def products(request):
     products = []
     tmp_products = Product.objects.all().order_by('-date_created')
@@ -1861,6 +1875,9 @@ def products(request):
     }
     return render(request,'shop/pages/products.html',context)
 
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
 def shopProductView(request,pk):
     #Product Section
     product = Product.objects.get(id=pk)
@@ -1955,7 +1972,9 @@ def shopProductView(request,pk):
     }
     return render(request,'shop/pages/productView.html',context)
 
-
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
 def storeSettings(request):
     #Neccesary Items
     categorys = Category.objects.all()
@@ -2049,7 +2068,7 @@ def storeSettings(request):
         update_new_category_collection = Category.objects.get(id = update_collection_estimated_category)
         update_collection_object.estimated_category = update_new_category_collection
         if update_collection_img:
-            update_collection_object.img
+            update_collection_object.img = update_collection_img
         update_collection_object.save()
 
         messages.success(request,'Collection updated successfully!')
@@ -2104,7 +2123,7 @@ def storeSettings(request):
         update_new_category_shopnow = Category.objects.get(id = update_shopnow_estimated_category)
         update_shopnow_object.estimated_category = update_new_category_shopnow
         if update_shopnow_img:
-            update_shopnow_object.img
+            update_shopnow_object.img = update_shopnow_img
         update_shopnow_object.save()
 
         messages.success(request,'Shop Now Category updated successfully!')
@@ -2247,6 +2266,9 @@ def shopnowSetting(request,pk):
     }
     return JsonResponse({'shopnow':context})
 
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
 def createOrder(request):
     #Neccessary Items
     products = []
@@ -2413,13 +2435,16 @@ def fetchCustomer(*arg,**kwargs):
         }
     return JsonResponse({'customer':context})
 
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
 def controlPanel(request):
     #Neccessary Items
-    products = []
+    discount_products = []
     tmp_products = Product.objects.all().order_by('-date_created')
     for i in tmp_products:
         if i.discount <= 0 :
-            products.append(productSerialize(i.id))
+            discount_products.append(productSerialize(i.id))
         else:
             pass
 
@@ -2441,6 +2466,27 @@ def controlPanel(request):
         update_charge_object.save()
         messages.success(request,'Delivery fee updated!')
         return redirect('store:control_panel')
+    
+    #Cupon Section
+    cupon_objects  = Cupon.objects.all().order_by('cupon_code')
+
+    #Add Coupon
+    if request.method == "POST" and 'add_cupon_name' in request.POST:
+        cupon_code = request.POST.get('add_cupon_name')
+        amount = request.POST.get('add_cupon_amount')
+        new_coupon_object =  Cupon.objects.create(cupon_code = cupon_code)
+        new_coupon_object.amount = amount
+        new_coupon_object.save()
+        messages.success(request,'Cupon created successfully!')
+        return redirect('store:control_panel')
+    
+    #Delete Coupon
+    if request.method == 'POST'  and 'cupon_id' in request.POST:
+        delete_coupon_object = Cupon.objects.get(id =  request.POST.get('cupon_id'))
+        delete_coupon_object.delete()
+        messages.success(request,'Cupon deleted successfully!')
+        return redirect('store:control_panel')
+
 
     #Discount Section
     discounts = DiscountDetails.objects.all()
@@ -2502,7 +2548,7 @@ def controlPanel(request):
         messages.success(request,'Products removed from the discount!')
         return redirect('store:control_panel')
     
-    #Delete Discount
+    #Delete Discountremove_category
     if request.method == 'POST' and 'remove_discount' in request.POST:
         delete_discount_object = DiscountDetails.objects.get(id = request.POST.get('remove_discount'))
         delete_category = delete_discount_object.category
@@ -2521,13 +2567,203 @@ def controlPanel(request):
 
         messages.success(request,'Discount deleted successfully!')
         return redirect('store:control_panel')
+    
+    #Category Section
+    category_products = Product.objects.all().order_by('name')
+    categorys = []
+    tmp_categorys = Category.objects.all().order_by('name')
+    for i in tmp_categorys:
+        name = i.name
+        id = i.id
+        hasProducts = Product.objects.filter(category = i).count()
+        categoryProducts = Product.objects.filter(category = i)
+
+        categoryWithProducts = {
+        'id':id,
+        'name':name,
+        'hasProducts':hasProducts,
+        'categoryProducts':categoryProducts
+        }
+        categorys.append(categoryWithProducts)
+    
+    #Add Category
+    if request.method == 'POST' and 'add_category_name' in request.POST:
+        add_category_name = request.POST.get('add_category_name')
+        category_product_list = request.POST.getlist('category_product_list')
+        total_category_products = len(category_product_list)
+        new_category_object = Category.objects.create(name = add_category_name)
+        if total_category_products > 0:
+            for i in category_product_list:
+                categoryProduct = Product.objects.get(id = i)
+                categoryProduct.category.add(new_category_object)
+        
+        messages.success(request,'Category created successfully!')
+        return redirect('store:control_panel')
+
+    #Add Products To Category
+    if request.method == 'POST' and 'category_add_product_list' in request.POST:
+        category_add_product_list = request.POST.getlist('category_add_product_list')
+        category_object = Category.objects.get(id = request.POST.get('category_id'))
+        for i in category_add_product_list:
+            category_add_product = Product.objects.get(id = i)
+            category_add_product.category.add(category_object)
+
+        messages.success(request,'Product added to category successfully!')
+        return redirect('store:control_panel')
+    
+    #Remove Products From Category
+    if request.method == 'POST' and 'category_remove_product_list' in request.POST:
+        category_remove_product_list = request.POST.getlist('category_remove_product_list')
+        category_remove_object = Category.objects.get(id = request.POST.get('category_id'))
+        for i in category_remove_product_list:
+            category_add_product = Product.objects.get(id = i)
+            category_add_product.category.remove(category_remove_object)
+
+        messages.success(request,'Product removed from category successfully!')
+        return redirect('store:control_panel')
+
+    #Delete Category 
+    if request.method == 'POST' and 'remove_category' in request.POST:
+        delete_category_object = Category.objects.get(id = request.POST.get('remove_category'))
+        delete_category_object.delete()
+
+        messages.success(request,'Category deleted successfully!')
+        return redirect('store:control_panel')
+
+    #Size Section
+    sizes = []
+    tmp_sizes = Size.objects.all().order_by('size')
+    for i in tmp_sizes:
+        size = i.size
+        id = i.id
+        hasProducts = Product.objects.filter(size = i).count()
+        sizeProducts = Product.objects.filter(size = i)
+
+        sizeWithProducts = {
+        'id':id,
+        'size':size,
+        'hasProducts':hasProducts,
+        'sizeProducts':sizeProducts
+        }
+        sizes.append(sizeWithProducts)
+
+    #Add Size
+    if request.method == 'POST' and 'add_size_name' in request.POST:
+        add_size_name = request.POST.get('add_size_name')
+        size_product_list = request.POST.getlist('size_product_list')
+        total_size_products = len(size_product_list)
+        new_size_object = Size.objects.create(size = add_size_name)
+        if total_size_products > 0:
+            for i in size_product_list:
+                sizeProduct = Product.objects.get(id = i)
+                sizeProduct.size.add(new_size_object)
+        
+        messages.success(request,'Size created successfully!')
+        return redirect('store:control_panel')
+
+    #Add Products To Size
+    if request.method == 'POST' and 'size_add_product_list' in request.POST:
+        size_add_product_list = request.POST.getlist('size_add_product_list')
+        size_object = Size.objects.get(id = request.POST.get('size_id'))
+        for i in size_add_product_list:
+            size_add_product = Product.objects.get(id = i)
+            size_add_product.size.add(size_object)
+
+        messages.success(request,'Product added to size successfully!')
+        return redirect('store:control_panel')
+    
+    #Remove Products From Size
+    if request.method == 'POST' and 'size_remove_product_list' in request.POST:
+        size_remove_product_list = request.POST.getlist('size_remove_product_list')
+        size_remove_object = Size.objects.get(id = request.POST.get('size_id'))
+        for i in size_remove_product_list:
+            size_add_product = Product.objects.get(id = i)
+            size_add_product.size.remove(size_remove_object)
+
+        messages.success(request,'Product removed from size successfully!')
+        return redirect('store:control_panel')
+
+    #Delete Size 
+    if request.method == 'POST' and 'remove_size' in request.POST:
+        delete_size_object = Size.objects.get(id = request.POST.get('remove_size'))
+        delete_size_object.delete()
+
+        messages.success(request,'Size deleted successfully!')
+        return redirect('store:control_panel')
+
+
+#Color Section
+    colors = []
+    tmp_colors = Color.objects.all().order_by('color')
+    for i in tmp_colors:
+        color = i.color
+        id = i.id
+        hasProducts = Product.objects.filter(color = i).count()
+        colorProducts = Product.objects.filter(color = i)
+
+        colorWithProducts = {
+        'id':id,
+        'color':color,
+        'hasProducts':hasProducts,
+        'colorProducts':colorProducts
+        }
+        colors.append(colorWithProducts)
+
+    #Add Color
+    if request.method == 'POST' and 'add_color_name' in request.POST:
+        add_color_name = request.POST.get('add_color_name')
+        color_product_list = request.POST.getlist('color_product_list')
+        total_color_products = len(color_product_list)
+        new_color_object = Color.objects.create(color = add_color_name)
+        if total_color_products > 0:
+            for i in color_product_list:
+                colorProduct = Product.objects.get(id = i)
+                colorProduct.color.add(new_color_object)
+        
+        messages.success(request,'Color created successfully!')
+        return redirect('store:control_panel')
+
+    #Add Products To Color
+    if request.method == 'POST' and 'color_add_product_list' in request.POST:
+        color_add_product_list = request.POST.getlist('color_add_product_list')
+        color_object = Color.objects.get(id = request.POST.get('color_id'))
+        for i in color_add_product_list:
+            color_add_product = Product.objects.get(id = i)
+            color_add_product.color.add(color_object)
+
+        messages.success(request,'Product added to color successfully!')
+        return redirect('store:control_panel')
+    
+    #Remove Products From Color
+    if request.method == 'POST' and 'color_remove_product_list' in request.POST:
+        color_remove_product_list = request.POST.getlist('color_remove_product_list')
+        color_remove_object = Color.objects.get(id = request.POST.get('color_id'))
+        for i in color_remove_product_list:
+            color_add_product = Product.objects.get(id = i)
+            color_add_product.color.remove(color_remove_object)
+
+        messages.success(request,'Product removed from color successfully!')
+        return redirect('store:control_panel')
+
+    #Delete Color 
+    if request.method == 'POST' and 'remove_color' in request.POST:
+        delete_color_object = Color.objects.get(id = request.POST.get('remove_color'))
+        delete_color_object.delete()
+
+        messages.success(request,'Color deleted successfully!')
+        return redirect('store:control_panel')
 
     context = {
         'total_customers':total_customers,
         'customers':customers,
         'delivery_charge_objects':delivery_charge_objects,
-        'products':products,
+        'products':discount_products,
         'discounts':discounts,
+        'categorys':categorys,
+        'category_products':category_products,
+        'sizes':sizes,
+        'colors':colors,
+        'cupon_objects':cupon_objects
     }
     return render(request,'shop/pages/controlPanel.html',context)
 
@@ -2551,3 +2787,61 @@ def customerDetails(request,pk):
             'orders':orders,
         }
     return JsonResponse({'details':context})
+
+@shopowner_only
+@allowed_users(allowed_roles=['admin'])
+@login_required(login_url='store:login')
+def shopBlogs(request):
+    blogs = Blog.objects.all().order_by('-date_added')
+
+    #Create Blog
+    if request.method == 'POST' and 'name' in request.POST:
+        name = request.POST.get('name')
+        place = request.POST.get('place')
+        image = request.FILES.get('image')
+        video = request.FILES.get('video')
+        description = request.POST.get('description')
+
+        new_blog = Blog.objects.create(name = name, place = place)
+        new_blog.description = description
+        if image:
+            new_blog.img = image
+        if video:
+            new_blog.video = video
+        new_blog.save()
+        messages.success(request,'Blog created successfully!')
+        return redirect('store:shop_blogs')
+    
+    #Update Blog
+    if request.method == 'POST' and 'blogName' in request.POST:
+        blogID = request.POST.get('blogID')
+        blogName = request.POST.get('blogName')
+        blogPlace = request.POST.get('blogPlace')
+        blogImage = request.FILES.get('blogImage')
+        blogVideo = request.FILES.get('blogVideo')
+        blogDescription = request.POST.get('blogDescription')
+
+        update_blog =  Blog.objects.get(id = blogID)
+        update_blog.name = blogName
+        update_blog.place = blogPlace
+        update_blog.description = blogDescription
+        if blogImage:
+            update_blog.img = blogImage
+        if blogVideo:
+            update_blog.video = blogVideo
+        update_blog.save()
+
+        messages.success(request,'Blog updated successfully!')
+        return redirect('store:shop_blogs')
+
+    #Delete Blog
+    if request.method == 'POST' and 'blog_delete' in request.POST:
+        blog = Blog.objects.get(id = request.POST.get('blog_delete'))
+        blog.delete()
+        messages.success(request,'Blog deleted successfully!')
+        return redirect('store:shop_blogs')
+
+    context = {
+        'blogs':blogs,
+    }
+    return render(request,'shop/pages/blogs.html',context)

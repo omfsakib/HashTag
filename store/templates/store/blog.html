@@ -24,10 +24,17 @@
                     </div>
                     <span class="article-date">{{blog.date}} | {{blog.place}}</span>
                       <div class="article-description">
-                          <img src="{{blog.img}}" alt="{{blog.name}}">
+                          
+                          {% if blog.video %}
+                          <video style = "max-width:350px;" controls>
+                              <source src="{{ blog.video }}" type="video/mp4">
+                          </video>
+                          {% endif %}
                           <p></p>
                           <p>&nbsp;&nbsp;&nbsp;&nbsp;{{blog.description|safe|linebreaks}}<br></p>
                           <p></p>
+                          
+                          <img src="{{blog.img}}" alt="{{blog.name}}">
                       </div>
                       
                   </div>

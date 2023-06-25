@@ -8,23 +8,28 @@ from django.contrib.auth import authenticate,login
 def productSerialize(id):
     product = Product.objects.get(id = id)
 
+    demo_price = 0
+    if product.discount > 0:
+        demo_price = product.price + product.discount_amount
+    
+    sizes = product.size.all()
+    if sizes:
+        first_size_loop = sizes[:1]
+        for i in first_size_loop:
+            first_size = i.size
+
+    color = product.color.all()
+    if color:
+        first_color_loop = color[:1]
+        for i in first_color_loop:
+            first_color = i.color
+
     total_images = ProductImages.objects.filter(product = product).count()
     if total_images == 1: 
         product_image_1_loop = ProductImages.objects.filter(product = product)[:1]
         for k in product_image_1_loop:
             product_image_1 = k.n_img.url
-        
-        sizes = product.size.all()
-        if sizes:
-            first_size_loop = sizes[:1]
-            for i in first_size_loop:
-                first_size = i.size
-        
-        color = product.color.all()
-        if color:
-            first_color_loop = color[:1]
-            for i in first_color_loop:
-                first_color = i.color
+    
 
         product_with_image = {
             'id':product.id,
@@ -40,6 +45,7 @@ def productSerialize(id):
             'date_created':product.date_created,
             'stock':product.stock,
             'discount':product.discount,
+            'demo_price':demo_price,
             'discount_amount':product.discount_amount,
             'rate':product.rate,
             'featured':product.featured,
@@ -54,18 +60,6 @@ def productSerialize(id):
         for k in product_image_2_loop:
             product_image_2 = k.n_img.url
 
-        sizes = product.size.all()
-        if sizes:
-            first_size_loop = sizes[:1]
-            for i in first_size_loop:
-                first_size = i.size
-
-        color = product.color.all()
-        if color:
-            first_color_loop = color[:1]
-            for i in first_color_loop:
-                first_color = i.color
-
         product_with_image = {
             'id':product.id,
             'name':product.name,
@@ -80,6 +74,7 @@ def productSerialize(id):
             'date_created':product.date_created,
             'stock':product.stock,
             'discount':product.discount,
+            'demo_price':demo_price,
             'discount_amount':product.discount_amount,
             'rate':product.rate,
             'featured':product.featured,
@@ -99,17 +94,6 @@ def productSerialize(id):
         for k in product_image_3_loop:
             product_image_3 = k.n_img.url
 
-        sizes = product.size.all()
-        if sizes:
-            first_size_loop = sizes[:1]
-            for i in first_size_loop:
-                first_size = i.size
-
-        color = product.color.all()
-        if color:
-            first_color_loop = color[:1]
-            for i in first_color_loop:
-                first_color = i.color
 
         product_with_image = {
             'id':product.id,
@@ -125,6 +109,7 @@ def productSerialize(id):
             'date_created':product.date_created,
             'stock':product.stock,
             'discount':product.discount,
+            'demo_price':demo_price,
             'discount_amount':product.discount_amount,
             'rate':product.rate,
             'featured':product.featured,
@@ -149,17 +134,7 @@ def productSerialize(id):
         for k in product_image_4_loop:
             product_image_4 = k.n_img.url
 
-        sizes = product.size.all()
-        if sizes:
-            first_size_loop = sizes[:1]
-            for i in first_size_loop:
-                first_size = i.size
-
-        color = product.color.all()
-        if color:
-            first_color_loop = color[:1]
-            for i in first_color_loop:
-                first_color = i.color
+        
 
         product_with_image = {
             'id':product.id,
@@ -175,6 +150,7 @@ def productSerialize(id):
             'date_created':product.date_created,
             'stock':product.stock,
             'discount':product.discount,
+            'demo_price':demo_price,
             'discount_amount':product.discount_amount,
             'rate':product.rate,
             'featured':product.featured,
@@ -204,17 +180,6 @@ def productSerialize(id):
         for k in product_image_5_loop:
             product_image_5 = k.n_img.url
 
-        sizes = product.size.all()
-        if sizes:
-            first_size_loop = sizes[:1]
-            for i in first_size_loop:
-                first_size = i.size
-
-        color = product.color.all()
-        if color:
-            first_color_loop = color[:1]
-            for i in first_color_loop:
-                first_color = i.color
 
         product_with_image = {
             'id':product.id,
@@ -230,6 +195,7 @@ def productSerialize(id):
             'date_created':product.date_created,
             'stock':product.stock,
             'discount':product.discount,
+            'demo_price':demo_price,
             'discount_amount':product.discount_amount,
             'rate':product.rate,
             'featured':product.featured,
@@ -254,6 +220,8 @@ def productSerialize(id):
             'date_created':product.date_created,
             'stock':product.stock,
             'discount':product.discount,
+            'demo_price':demo_price,
+            'demo_price':demo_price,
             'discount_amount':product.discount_amount,
             'rate':product.rate,
         }
@@ -393,12 +361,18 @@ def blogs_with_detailed_date(id):
     tmp_blog_day = tmp_blog.date_added.day
     tmp_blog_date = tmp_blog.date_added.date()
 
+    if tmp_blog.video:
+        video = tmp_blog.video.url,
+    else:
+        video = None
+
     blog = {
         'id' : tmp_blog.id,
         'name' : tmp_blog.name,
         'place' : tmp_blog.place,
         'description' : tmp_blog.description,
         'img' : tmp_blog.img.url,
+        'video':video,
         'date' : tmp_blog_date,
         'day' : tmp_blog_day,
         'month' : tmp_blog_month,

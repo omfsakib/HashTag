@@ -2,6 +2,10 @@
 
 {% block content %}
 <style>
+    .add-cupon,
+    .add-color,
+    .add-size,
+    .add-category,
     .view-customer{
         position: fixed;
         top: 50%;
@@ -108,6 +112,22 @@
     function toggleDiscountEdit(className) {
         $(className).toggle()
     }
+    function toggleCategoryEdit(className) {
+        $(className).toggle()
+    }
+    function addCategory() {
+        $('.add-category').toggle()
+    }
+    function addSize() {
+        $('.add-size').toggle()
+    }
+    function addColor() {
+        $('.add-color').toggle()
+    }
+    function addCupon() {
+        $('.add-cupon').toggle()
+    }
+    
     
     function filterProduct(status){
         $.each($("#product_table tbody tr"), function() {
@@ -129,8 +149,89 @@
                 $(this).show();                
          });
     }
+    function categoryProductSearch(status){
+        $.each($("#categoryProductTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
     function discountProductRemoveSearch(status){
         $.each($("#discountProductRemoveTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    function categorySearch(status){
+        $.each($("#categoryTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    function categoryProductSearch(status){
+        $.each($("#categoryProductTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    function sizeSearch(status){
+        $.each($("#sizeTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    function sizeProductSearch(status){
+        $.each($("#sizeProductTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    function colorSearch(status){
+        $.each($("#colorTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    function colorProductSearch(status){
+        $.each($("#colorProductTable tbody tr"), function() {
+            if(status.toLowerCase() == 'all')
+                $(this).show();  
+            else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
+                $(this).hide();
+            else
+                $(this).show();                
+         });
+    }
+    
+    function searchCupon(status){
+        $.each($("#couponProductTable tbody tr"), function() {
             if(status.toLowerCase() == 'all')
                 $(this).show();  
             else if($(this).text().toLowerCase().indexOf(status.toLowerCase()) === -1)
@@ -189,6 +290,169 @@
         </div>
     </div>
 </div>
+<div class="add-category" style="overflow: auto;">
+    <div onclick="addCategory()" class="close-btn">
+        ×
+    </div>
+    <div class="content">
+        <div class="heading text-center">
+            <h3> Add Category </h3>
+        </div><hr>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="text" name="add_category_name" class="form-control" placeholder="Enter name for category"> <br>
+                        <h3>Select products</h3>
+                        <div class="table-responsive" style="height: 300px; overflow:auto;">
+                            <table class="table table-bordered" id="categoryProductTable">
+                                <thead>
+                                    <tr>
+                                        <td colspan="4"><input type="text" class="form-control" onkeyup="categoryProductSearch(this.value)"  placeholder="Search products....."></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in category_products %}
+                                    <tr>
+                                        <td style="width: 20px;"><input type="checkbox" name="category_product_list" value="{{product.id}}"></td>
+                                        <td>{{product.name}}</td>
+                                        <td>{{product.product_code}}</td>
+                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="add-size" style="overflow: auto;">
+    <div onclick="addSize()" class="close-btn">
+        ×
+    </div>
+    <div class="content">
+        <div class="heading text-center">
+            <h3> Add Size </h3>
+        </div><hr>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="text" name="add_size_name" class="form-control" placeholder="Enter name for size"> <br>
+                        <h3>Select products</h3>
+                        <div class="table-responsive" style="height: 300px; overflow:auto;">
+                            <table class="table table-bordered" id="sizeProductTable">
+                                <thead>
+                                    <tr>
+                                        <td colspan="4"><input type="text" class="form-control" onkeyup="sizeProductSearch(this.value)"  placeholder="Search products....."></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in category_products %}
+                                    <tr>
+                                        <td style="width: 20px;"><input type="checkbox" name="size_product_list" value="{{product.id}}"></td>
+                                        <td>{{product.name}}</td>
+                                        <td>{{product.product_code}}</td>
+                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="add-color" style="overflow: auto;">
+    <div onclick="addColor()" class="close-btn">
+        ×
+    </div>
+    <div class="content">
+        <div class="heading text-center">
+            <h3> Add Color </h3>
+        </div><hr>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="text" name="add_color_name" class="form-control" placeholder="Enter name for color"> <br>
+                        <h3>Select products</h3>
+                        <div class="table-responsive" style="height: 300px; overflow:auto;">
+                            <table class="table table-bordered" id="colorProductTable">
+                                <thead>
+                                    <tr>
+                                        <td colspan="4"><input type="text" class="form-control" onkeyup="colorProductSearch(this.value)"  placeholder="Search products....."></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in category_products %}
+                                    <tr>
+                                        <td style="width: 20px;"><input type="checkbox" name="color_product_list" value="{{product.id}}"></td>
+                                        <td>{{product.name}}</td>
+                                        <td>{{product.product_code}}</td>
+                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="add-cupon" style="overflow: auto;">
+    <div onclick="addCupon()" class="close-btn">
+        ×
+    </div>
+    <div class="content">
+        <div class="heading text-center">
+            <h3> Add Coupon </h3>
+        </div><hr>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="text" name="add_cupon_name" class="form-control" placeholder="Enter name "> <br>
+                        <input type="number" name="add_cupon_amount" class="form-control" placeholder="Enter amount">
+                        <button type="submit" class="btn btn-success">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
     <div class="main">
         <div class="row">
@@ -228,7 +492,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12">
+            <div class="col-sm-6">
                 <div class="delivery_heading text-center">
                     <h3>Delivery Charge</h3>
                 </div>
@@ -251,6 +515,43 @@
                                             <td class="text-center"><button type="submit" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i></button></td>
                                         </tr>
                                     </form>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="delivery_heading text-center">
+                    <h3>Coupon Code</h3>
+                </div>
+                <div class="content">
+                    <div class="table-responsive"  style="border: none;">
+                        <div class="table">
+                            <table class="table table-bordered" id="couponProductTable">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2"><input class="form-control" type="text" onkeyup="searchCupon(this.value)" placeholder="Search cupon code...."></th>
+                                        <th class="text-center"><button class="btn btn-info" onclick="addCupon()"><i class="fa fa-plus" aria-hidden="true"></i></button></th>
+                                    </tr>
+                                    <th class="text-center">Coupon</th>
+                                    <th class="text-center">Amount</th>
+                                    <th class="text-center">Action</th>
+                                </thead>
+                                <tbody>
+                                    {% for i in  cupon_objects %}
+                                    <tr>
+                                        <td class="text-center">{{i.cupon_code}}</td>
+                                        <td class="text-center">{{i.amount|floatformat:0}}</td>
+                                        <td class="text-center">
+                                            <form method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="cupon_id" value="{{i.id}}">
+                                                <button type="submit" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -415,6 +716,399 @@
                                                             </table>
                                                         </div> <br>
                                                         <button type="submit"  class="btn btn-danger"><i class="fa fa-plus" aria-hidden="true"></i> Remove</button> <br> <hr>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="heading text-center">
+                    <h3>Category with products</h3>
+                </div>
+                <div class="content" style="max-height: 300px;overflow: auto;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="categoryTable">
+                            <thead>
+                                <tr>
+                                    <th colspan="3"><input type="text" class="form-control" placeholder="Search categorys..." onkeyup="categorySearch(this.value)"></th>
+                                    <th><button type="button" class="btn btn-info" onclick="addCategory()"><i class="fa fa-plus" aria-hidden="true"></i> category</button></th>
+                                </tr>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Products Have</th>
+                                    <th>Products</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categorys %}
+                                <tr>
+                                    <td>{{category.name}}</td>
+                                    <td>{{category.hasProducts}}</td>
+                                    <td>
+                                        <div class="product_list" style="max-height: 60px; overflow:auto">
+                                            {% for product in category.categoryProducts %}
+                                            <a href="{% url 'store:shop_product_view' product.id %}">
+                                                <p><span>Name : {{product.name}},</span> <span>Code : {{product.product_code}}</span></p>
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-info" onclick="toggleCategoryEdit('.editCategory'+'{{category.id}}')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                                        <form  method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" name="remove_category" value="{{category.id}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                        </form>
+                                        <div class="editCategory{{category.id}}" style="overflow: auto;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);max-width: 88%;max-height: 88%;   min-width: 350px;background-color: #ddddddf5;border: 1px solid #eee;box-sizing: border-box;padding: 10px;
+                                        z-index: 100;
+                                        display: none;    
+                                        border-radius: 20px;">
+                                            <div onclick="toggleCategoryEdit('.editCategory'+'{{category.id}}')" class="close-btn" style="font-size: 14px;">
+                                                ×
+                                            </div>
+                                            <div class="content">
+                                                <div class="heading text-center">
+                                                    <h3>{{category.name}}</h3>
+                                                    <p>{{category.hasProducts}} products</p> 
+                                                </div><hr>
+                                                <div class="add_product_container">
+                                                    <h4>Add products to this category</h4>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="category_id" value="{{category.id}}">
+                                                        <div class="table-responsive" style="max-height: 225px; overflow:auto;">
+                                                            <table class="table table-bordered" id="categoryProductTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td colspan="4"><input type="text" class="form-control" placeholder="Search products" onkeyup="categoryProductSearch(this.value)"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Select</th>
+                                                                        <th>Name</th>
+                                                                        <th>Code</th>
+                                                                        <th>Price</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for product in category_products %}
+                                                                    {% if product in category.categoryProducts %}
+                                                                    {{pass}}
+                                                                    {% else %}
+                                                                    <tr>
+                                                                        <td style="width: 20px;"><input type="checkbox" name="category_add_product_list" value="{{product.id}}"></td>
+                                                                        <td>{{product.name}}</td>
+                                                                        <td>{{product.product_code}}</td>
+                                                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                                                    </tr>
+                                                                    {% endif %}
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div> <br>
+                                                        <button type="submit"  class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Add</button> <br> <hr>
+                                                    </form>
+                                                </div>
+                                                <div class="remove_product_container">
+                                                    <h4>Remove products from this category</h4>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="category_id" value="{{category.id}}">
+                                                        <div class="table-responsive" style="max-height: 225px; overflow:auto;">
+                                                            <table class="table table-bordered" id="categoryProductTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td colspan="4"><input type="text" class="form-control" placeholder="Search products" onkeyup="categoryProductSearch(this.value)"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Select</th>
+                                                                        <th>Name</th>
+                                                                        <th>Code</th>
+                                                                        <th>Price</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for product in category.categoryProducts %}
+                                                                    <tr>
+                                                                        <td style="width: 20px;"><input type="checkbox" name="category_remove_product_list" value="{{product.id}}"></td>
+                                                                        <td>{{product.name}}</td>
+                                                                        <td>{{product.product_code}}</td>
+                                                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div> <br>
+                                                        <button type="submit"  class="btn btn-danger"><i class="fa fa-plus" aria-hidden="true"></i> Remove</button> <br> <hr>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="heading text-center">
+                    <h3>Size with products</h3>
+                </div>
+                <div class="content" style="max-height: 300px;overflow: auto;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="sizeTable">
+                            <thead>
+                                <tr>
+                                    <th colspan="3"><input type="text" class="form-control" placeholder="Search sizes..." onkeyup="sizeSearch(this.value)"></th>
+                                    <th><button type="button" class="btn btn-info" onclick="addSize()"><i class="fa fa-plus" aria-hidden="true"></i> size</button></th>
+                                </tr>
+                                <tr>
+                                    <th>Size</th>
+                                    <th>Products Have</th>
+                                    <th>Products</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for size in sizes %}
+                                <tr>
+                                    <td>{{size.size}}</td>
+                                    <td>{{size.hasProducts}}</td>
+                                    <td>
+                                        <div class="product_list" style="max-height: 60px; overflow:auto">
+                                            {% for product in size.sizeProducts %}
+                                            <a href="{% url 'store:shop_product_view' product.id %}">
+                                                <p><span>Name : {{product.name}},</span> <span>Code : {{product.product_code}}</span></p>
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-info" onclick="toggleCategoryEdit('.editSize'+'{{size.id}}')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                                        <form  method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" name="remove_size" value="{{size.id}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                        </form>
+                                        <div class="editSize{{size.id}}" style="overflow: auto;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);max-width: 88%;max-height: 88%;   min-width: 350px;background-color: #ddddddf5;border: 1px solid #eee;box-sizing: border-box;padding: 10px;
+                                        z-index: 100;
+                                        display: none;    
+                                        border-radius: 20px;">
+                                            <div onclick="toggleCategoryEdit('.editSize'+'{{size.id}}')" class="close-btn" style="font-size: 14px;">
+                                                ×
+                                            </div>
+                                            <div class="content">
+                                                <div class="heading text-center">
+                                                    <h3>{{size.size}}</h3>
+                                                    <p>{{size.hasProducts}} products</p> 
+                                                </div><hr>
+                                                <div class="add_product_container">
+                                                    <h4>Add products to this size</h4>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="size_id" value="{{size.id}}">
+                                                        <div class="table-responsive" style="max-height: 225px; overflow:auto;">
+                                                            <table class="table table-bordered" id="sizeProductTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td colspan="4"><input type="text" class="form-control" placeholder="Search products" onkeyup="sizeProductSearch(this.value)"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Select</th>
+                                                                        <th>Name</th>
+                                                                        <th>Code</th>
+                                                                        <th>Price</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for product in category_products %}
+                                                                    {% if product in size.sizeProducts %}
+                                                                    {{pass}}
+                                                                    {% else %}
+                                                                    <tr>
+                                                                        <td style="width: 20px;"><input type="checkbox" name="size_add_product_list" value="{{product.id}}"></td>
+                                                                        <td>{{product.name}}</td>
+                                                                        <td>{{product.product_code}}</td>
+                                                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                                                    </tr>
+                                                                    {% endif %}
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div> <br>
+                                                        <button type="submit"  class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Add</button> <br> <hr>
+                                                    </form>
+                                                </div>
+                                                <div class="remove_product_container">
+                                                    <h4>Remove products from this size</h4>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="size_id" value="{{size.id}}">
+                                                        <div class="table-responsive" style="max-height: 225px; overflow:auto;">
+                                                            <table class="table table-bordered" id="sizeProductTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td colspan="4"><input type="text" class="form-control" placeholder="Search products" onkeyup="sizeProductSearch(this.value)"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Select</th>
+                                                                        <th>Name</th>
+                                                                        <th>Code</th>
+                                                                        <th>Price</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for product in size.sizeProducts %}
+                                                                    <tr>
+                                                                        <td style="width: 20px;"><input type="checkbox" name="size_remove_product_list" value="{{product.id}}"></td>
+                                                                        <td>{{product.name}}</td>
+                                                                        <td>{{product.product_code}}</td>
+                                                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div> <br>
+                                                        <button type="submit"  class="btn btn-danger"><i class="fa fa-plus" aria-hidden="true"></i> Remove</button> <br> <hr>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="heading text-center">
+                    <h3>Color with products</h3>
+                </div>
+                <div class="content" style="max-height: 300px;overflow: auto;">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="colorTable">
+                            <thead>
+                                <tr>
+                                    <th colspan="3"><input type="text" class="form-control" placeholder="Search colors..." onkeyup="colorSearch(this.value)"></th>
+                                    <th><button type="button" class="btn btn-info" onclick="addColor()"><i class="fa fa-plus" aria-hidden="true"></i> color</button></th>
+                                </tr>
+                                <tr>
+                                    <th>Color</th>
+                                    <th>Products Have</th>
+                                    <th>Products</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for color in colors %}
+                                <tr>
+                                    <td>{{color.color}}</td>
+                                    <td>{{color.hasProducts}}</td>
+                                    <td>
+                                        <div class="product_list" style="max-height: 60px; overflow:auto">
+                                            {% for product in color.colorProducts %}
+                                            <a href="{% url 'store:shop_product_view' product.id %}">
+                                                <p><span>Name : {{product.name}},</span> <span>Code : {{product.product_code}}</span></p>
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-info" onclick="toggleCategoryEdit('.editColor'+'{{color.id}}')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                                        <form  method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" name="remove_color" value="{{color.id}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                        </form>
+                                        <div class="editColor{{color.id}}" style="overflow: auto;position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);max-width: 88%;max-height: 88%;   min-width: 350px;background-color: #ddddddf5;border: 1px solid #eee;box-sizing: border-box;padding: 10px;
+                                        z-index: 100;
+                                        display: none;    
+                                        border-radius: 20px;">
+                                            <div onclick="toggleCategoryEdit('.editColor'+'{{color.id}}')" class="close-btn" style="font-size: 14px;">
+                                                ×
+                                            </div>
+                                            <div class="content">
+                                                <div class="heading text-center">
+                                                    <h3>{{color.color}}</h3>
+                                                    <p>{{color.hasProducts}} products</p> 
+                                                </div><hr>
+                                                <div class="add_product_container">
+                                                    <h4>Add products to this color</h4>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="color_id" value="{{color.id}}">
+                                                        <div class="table-responsive" style="max-height: 225px; overflow:auto;">
+                                                            <table class="table table-bordered" id="colorProductTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td colspan="4"><input type="text" class="form-control" placeholder="Search products" onkeyup="colorProductSearch(this.value)"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Select</th>
+                                                                        <th>Name</th>
+                                                                        <th>Code</th>
+                                                                        <th>Price</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for product in category_products %}
+                                                                    {% if product in color.colorProducts %}
+                                                                    {{pass}}
+                                                                    {% else %}
+                                                                    <tr>
+                                                                        <td style="width: 20px;"><input type="checkbox" name="color_add_product_list" value="{{product.id}}"></td>
+                                                                        <td>{{product.name}}</td>
+                                                                        <td>{{product.product_code}}</td>
+                                                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                                                    </tr>
+                                                                    {% endif %}
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div> <br>
+                                                        <button type="submit"  class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Add</button> <br> <hr>
+                                                    </form>
+                                                </div>
+                                                <div class="remove_product_container">
+                                                    <h4>Remove products from this color</h4>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="color_id" value="{{color.id}}">
+                                                        <div class="table-responsive" style="max-height: 225px; overflow:auto;">
+                                                            <table class="table table-bordered" id="colorProductTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td colspan="4"><input type="text" class="form-control" placeholder="Search products" onkeyup="colorProductSearch(this.value)"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Select</th>
+                                                                        <th>Name</th>
+                                                                        <th>Code</th>
+                                                                        <th>Price</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for product in color.colorProducts %}
+                                                                    <tr>
+                                                                        <td style="width: 20px;"><input type="checkbox" name="color_remove_product_list" value="{{product.id}}"></td>
+                                                                        <td>{{product.name}}</td>
+                                                                        <td>{{product.product_code}}</td>
+                                                                        <td>{{product.price|floatformat:0}}&#2547;</td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div> <br>
+                                                        <button type="submit"  class="btn btn-danger"><i class="fa fa-minus" aria-hidden="true"></i> Remove</button> <br> <hr>
                                                     </form>
                                                 </div>
                                             </div>

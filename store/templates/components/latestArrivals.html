@@ -9,9 +9,6 @@
                                 <h2>
                                     Latest Arrivals
                                 </h2>
-                                <div class="module-description">
-                                    Mirum est notare quam littera gothica, quam nunc putamus parum claram anteposuerit litterarum formas. 
-                                </div>
                             </div>
                             <div class="tt-product  owl-carousel owl-theme ">	
             
@@ -25,8 +22,13 @@
                                                     <img class="img-r" src="{{i.image_2}}" alt="{{i.name}}" />
                                                     <img src="{{i.image_1}}" alt="{{i.name}}" title="{{i.name}}" class="img-responsive" />
                                                 </a>			  
-                                                <div class="label-product label_new">New</div>
-                                                    
+                                                {% if i.stock <= 0 %}
+                                                <div class="label-product label_sale" style="line-height: 11px; font-size: 12px; padding-top: 14px; text-transform: uppercase;">Stock out</div>
+                                                {% elif i.featured %}
+                                                <div class="label-product label_sale" style="line-height: 16px; font-size: 14px; padding-top: 8px; background: #ee3333; text-transform: uppercase;">Sale {{i.discount}}%</div>
+                                                {% else %}	
+                                                <div class="label-product label_new" style="line-height: 13px; font-size: 10px; padding-top: 10px; text-transform: uppercase;">New Arrivals</div>
+                                                {% endif %}	  
                                                 <div class="action-links">
                                                     <button class="btn-cart update-cart" type="button" data-product={{i.id}} data-size="{{i.first_size}}" data-color="{{i.first_color}}" data-action="add" title="Add to Cart">
                                                         <i class="ion-bag"></i>
@@ -60,7 +62,9 @@
                                                 <h4 class="product-name">
                                                     <a href="{% url 'store:product_view' i.id %}">{{ i.name }}</a>
                                                 </h4>                  
-                                                <p class="price">&#2547;{{i.price}}</p>
+                                                
+                                                <p class="price"> {% if i.discount > 0 %} <del>&#2547;{{i.demo_price|floatformat:0}} </del>{% endif %} &#2547;{{i.price|floatformat:0}} 
+                                                    {% if i.discount > 0 %}<span style="font-size: 12px;">( {{i.discount}}% discount )</span> {% endif %}</p>
                                             </div><!-- caption -->
                                         </div><!-- product-thumb -->
                                     </div><!-- product-layout -->
